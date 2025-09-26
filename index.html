@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronotech Odyssey: Puente Generacional - Albert Gaviria Edition</title>
+    <!-- Import Tone.js para efectos de sonido inmersivos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Paleta de Colores y Variables (Minimalista) --- */
+        :root {
+            --primary: #4a90e2; /* Azul profesional */
+            --secondary: #63d471; /* Verde sutil */
+            --accent: #e27d60; /* Coral suave, para urgencia/alerta */
+            --bg-dark: #1e293b; /* Azul oscuro elegante */
+            --bg-medium: #334155;
+            --text-light: #e2e8f0; /* Gris claro para texto */
+            --card-bg: rgba(255, 255, 255, 0.08); /* Fondo de tarjeta transparente */
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --transition: all 0.4s ease;
+            --dev-color: #ffc300; /* Color para personalización */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        /* --- Particle/Star Field Background --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 1px, var(--bg-dark) 1px),
+                        radial-gradient(circle, transparent 1px, var(--bg-dark) 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            z-index: -1;
+            animation: move-stars 120s linear infinite;
+        }
+
+        @keyframes move-stars {
+            from { background-position: 0 0; }
+            to { background-position: 50px 50px; }
+        }
+
+        /* --- Header for Personalization --- */
+        header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--dev-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 195, 0, 0.2);
+        }
+
+        /* --- Global Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        section {
+            padding: 80px 20px;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* --- Hero Section (Welcome) --- */
+        #hero {
+            padding-top: 150px;
+            background: linear-gradient(135deg, var(--bg-dark), #101721);
+            position: relative;
+        }
+
+        .title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5em, 5vw, 4.5em);
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        .subtitle {
+            font-size: clamp(1em, 2vw, 1.4em);
+            margin-bottom: 40px;
+            max-width: 800px;
+            opacity: 0.8;
+            animation: fadeIn 1.5s 0.2s forwards;
+            opacity: 0;
+        }
+        
+        /* --- Button Styling --- */
+        .btn {
+            background: var(--primary);
+            border: none;
+            padding: 14px 35px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 20px rgba(74, 144, 226, 0.4);
+            text-transform: uppercase;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #5a9ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.6);
+        }
+
+        .btn:disabled {
+            background: var(--bg-medium);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+        
+        /* --- Tutorial Section --- */
+        #tutorial {
+            background: var(--bg-medium);
+            padding: 40px 20px;
+        }
+        #tutorial h2 {
+            color: var(--dev-color);
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 30px;
+        }
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            text-align: left;
+        }
+        .guide-card {
+            background: var(--bg-dark);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--secondary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .guide-card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* --- Game Container & HUD --- */
+        #game-section {
+            display: none;
+            background: var(--bg-medium);
+        }
+
+        #game-section.active { display: flex; }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px; /* Reduced margin to fit timeline */
+            backdrop-filter: blur(5px);
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .score { font-size: 1.4em; font-weight: 600; color: var(--secondary); }
+        .digital-compass { 
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2em; 
+            color: var(--primary);
+            flex-grow: 0;
+        }
+        
+        /* Chrono Meter */
+        .chrono-meter {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4em;
+            color: var(--accent);
+            text-shadow: 0 0 5px rgba(226, 125, 96, 0.8);
+            margin: 0 20px;
+            flex-grow: 1;
+            text-align: center;
+            transition: color 0.5s;
+        }
+        
+        /* --- TIMELINE (Mini-Map) --- */
+        .timeline-container {
+            width: 100%;
+            padding: 10px 0;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        .timeline-era {
+            flex-grow: 1;
+            height: 4px;
+            background: var(--bg-medium);
+            margin: 0 5px;
+            position: relative;
+            transition: background 0.5s;
+        }
+        .timeline-era.completed {
+            background: var(--secondary);
+        }
+        .era-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-medium);
+            border: 2px solid var(--primary);
+            transition: all 0.5s;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .era-marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+        .era-marker.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        .era-marker.completed {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+        .era-marker:last-child {
+            right: 0;
+            transform: translate(50%, -50%);
+        }
+
+        .time-travel-btn {
+            background: var(--accent);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+
+        /* --- Scene Styling (Unchanged) --- */
+        .scene {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            min-height: 400px;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .scene.active { display: flex; }
+
+        .scene-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2em;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+        }
+
+        .scene-desc {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 700px;
+        }
+
+        /* --- Mini-Game Elements (Memory & Puzzle - Unchanged) --- */
+        .mini-game {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        #memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+            perspective: 1000px; 
+        }
+
+        .memory-card {
+            background: var(--bg-medium);
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 2em;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .card-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 80px;
+            backface-visibility: hidden;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .memory-card { height: 60px; }
+            .card-content { line-height: 60px; }
+        }
+
+
+        .card-front {
+            background: var(--primary);
+            color: var(--text-light);
+            transform: rotateY(180deg);
+        }
+
+        .card-back {
+            background: var(--bg-medium);
+            color: var(--text-light);
+            transform: rotateY(0deg);
+            font-size: 1.5em;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched {
+            transform: rotateY(180deg);
+            box-shadow: 0 0 15px var(--secondary);
+            cursor: default;
+        }
+        
+        /* --- General Mini-Game Styles (Unchanged) --- */
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 10px;
+        }
+
+        /* --- Footer (Unchanged) --- */
+        footer {
+            background: #101721;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 50px;
+            border-top: 1px solid var(--bg-medium);
+        }
+        .footer-credits {
+            color: var(--dev-color);
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+
+        /* --- Keyframes (Unchanged) --- */
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes urgentFlash {
+            0%, 100% { color: var(--accent); }
+            50% { color: yellow; }
+        }
+
+        /* --- Responsive Design (Refined) --- */
+        @media (max-width: 768px) {
+            section { padding: 50px 10px; }
+            .title { font-size: 2.8em; }
+            .subtitle { font-size: 1.1em; }
+            
+            /* HUD Responsiveness */
+            .hud { flex-direction: column; gap: 10px; padding: 15px; }
+            .digital-compass { order: -1; margin-bottom: 10px; }
+            .chrono-meter { order: 0; margin: 10px 0; width: 100%; }
+            .score { order: 1; }
+            .time-travel-btn { width: 100%; order: 3; }
+            
+            /* Timeline Responsiveness */
+            .timeline-container { flex-wrap: wrap; justify-content: space-around; }
+            .timeline-era { flex-basis: 100%; height: 20px; margin: 5px 0; }
+            .era-marker { position: static; transform: none; margin: 5px; }
+            .era-marker:last-child { transform: none; }
+
+            .guide-card { border-left: none; border-bottom: 5px solid var(--secondary); }
+            .bridge { flex-direction: column; }
+            .bridge-line { width: 4px; height: 30px; margin: 10px 0; }
+            .puzzle-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+            #memory-grid { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        CHRONOTECH ODYSSEY: BRIDGE BUILDER SIMULATOR 
+        <div class="footer-credits">Desarrollado por: Albert Daniel Gaviria - Chronotech Founder</div>
+    </header>
+
+    <!-- 1. Hero Section -->
+    <section id="hero">
+        <div class="container">
+            <h1 class="title">🚀 Chronotech Odyssey</h1>
+            <p class="subtitle">Viaja a través de las generaciones, domina sus tecnologías y construye puentes digitales para unir el mundo. ¡El futuro de la comunicación depende de tu empatía tecnológica!</p>
+            <button class="btn" onclick="scrollToElement('tutorial')">Ver Tutorial</button>
+        </div>
+    </section>
+    
+    <!-- 2. Tutorial Section (NUEVO) -->
+    <section id="tutorial">
+        <div class="container">
+            <h2>MANUAL DE OPERACIONES CHRONOTECH</h2>
+            <p class="scene-desc">Este manual es un resumen inteligente para asegurar la eficiencia de tu misión.</p>
+            
+            <div class="tutorial-grid">
+                
+                <div class="guide-card">
+                    <h3>¿Qué Hace el Proyecto?</h3>
+                    <p>Simula un viaje a través de 8 eras generacionales de la tecnología, desde 1901 hasta la actualidad (Alpha/Z). El objetivo es que, al interactuar con los desafíos de cada época, el jugador desarrolle **empatía tecnológica** y habilidades de comunicación adaptable.</p>
+                    <p><strong>El resultado:</strong> Eres un **Maestro Cronotech**, capaz de comunicarte eficazmente con cualquier generación.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>Cómo se Juega (La Aventura)</h3>
+                    <ol>
+                        <li>**Inicio:** La misión comienza con el módulo de **Calibración Temporal** (Juego de Memoria).</li>
+                        <li>**Desafíos:** Supera los 7 desafíos de era restantes (Presente, Silenciosa, Boomers, X, Millennials, Z, Alpha).</li>
+                        <li>**Éxito:** Responde correctamente a la pregunta o supera la prueba de destreza. Obtienes 10 puntos y un sonido de éxito.</li>
+                        <li>**Avance:** El botón 'Viajar a Siguiente Era' se activa automáticamente al completar el desafío.</li>
+                    </ol>
+                </div>
+
+                <div class="guide-card">
+                    <h3>El CHRONO-METER y el Riesgo</h3>
+                    <p><strong>¿Qué Pasa si SÍ?:</strong> Si completas la misión antes de que el **Chrono-Meter** llegue a cero, obtienes los 10 puntos y avanzas. Tu tiempo restante se suma a tu **Puntuación de Eficiencia**, lo que mejora tu rango final.</p>
+                    <p><strong>¿Qué Pasa si NO?:</strong> Si el tiempo se agota, suena la alarma de fallo. Pierdes el desafío (0 puntos) y se te penaliza en el tiempo total. El botón 'Viajar a Siguiente Era' se habilita forzosamente para que puedas continuar, pero afectará tu **Rango Chronotech**.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>Lo que NO se Hace</h3>
+                    <ul>
+                        <li>**No te Demores:** El Chrono-Meter es real. Los desafíos de Selección (Radio/TV/Social/TikTok) deben hacerse con velocidad.</li>
+                        <li>**No Clickees al Azar:** Los juegos de selección tienen penalizaciones implícitas; si te equivocas, pierdes tiempo valioso.</li>
+                        <li>**No Inicies sin Concentración:** El juego de Calibración (Memoria) es fundamental. Inícialo solo cuando estés listo, ya que usa el tiempo más largo (60s).</li>
+                    </ul>
+                </div>
+
+            </div>
+            <button class="btn submit-btn" onclick="startGame()" style="margin-top: 40px;">¡Comenzar Odisea Ahora!</button>
+        </div>
+    </section>
+
+    <!-- 3. Game Simulator Section -->
+    <section id="game-section" class="container">
+        <!-- HUD - Head-Up Display -->
+        <div class="hud">
+            <div class="score">Puntuación: <span id="score">0</span></div>
+            <div class="digital-compass">Era Actual: <span id="current-era">Inicializando...</span></div>
+            <div class="chrono-meter">Tiempo: <span id="time-remaining">--</span></div>
+            <button class="btn time-travel-btn" id="time-travel-btn" onclick="timeTravel()" disabled>Viajar a Siguiente Era ➡️</button>
+        </div>
+        
+        <!-- TIMELINE (MINI-MAP) -->
+        <div class="timeline-container">
+            <!-- Marcadores de era del 0 al 7 -->
+            <span class="era-marker marker-0" data-index="0" title="Calibración"></span>
+            <div class="timeline-era era-0" data-index="0"></div>
+            <span class="era-marker marker-1" data-index="1" title="Presente"></span>
+            <div class="timeline-era era-1" data-index="1"></div>
+            <span class="era-marker marker-2" data-index="2" title="Silenciosa"></span>
+            <div class="timeline-era era-2" data-index="2"></div>
+            <span class="era-marker marker-3" data-index="3" title="Boomers"></span>
+            <div class="timeline-era era-3" data-index="3"></div>
+            <span class="era-marker marker-4" data-index="4" title="Gen X"></span>
+            <div class="timeline-era era-4" data-index="4"></div>
+            <span class="era-marker marker-5" data-index="5" title="Millennials"></span>
+            <div class="timeline-era era-5" data-index="5"></div>
+            <span class="era-marker marker-6" data-index="6" title="Gen Z"></span>
+            <div class="timeline-era era-6" data-index="6"></div>
+            <span class="era-marker marker-7" data-index="7" title="Alpha"></span>
+        </div>
+
+        <!-- Scenes (The actual game content) -->
+        <div id="scenes" style="width: 100%;">
+            
+            <!-- Scene 0: Calibration (Memory Game) -->
+            <div class="scene active" data-scene="0">
+                <h2 class="scene-title">Calibración Temporal: Módulo de Memoria</h2>
+                <p class="scene-desc">Tienes 60 segundos para activar tu memoria tecnológica encontrando los 4 pares de íconos. ¡Precisión y velocidad!</p>
+                <div class="mini-game">
+                    <div id="memory-grid">
+                        <!-- Cards will be generated by JavaScript -->
+                    </div>
+                    <p id="memory-status" style="font-weight: bold; margin-top: 15px; color: var(--accent);"></p>
+                    <button class="btn submit-btn" onclick="initializeMemoryGame(true)" id="start-memory-btn">Iniciar Juego de Memoria</button>
+                    <div class="feedback" id="feedback-0"></div>
+                </div>
+            </div>
+
+            <!-- Scene 1: Present (Gen Alpha/Z) -->
+            <div class="scene" data-scene="1">
+                <h2 class="scene-title">Presente: Era Digital (Gen Alpha/Z)</h2>
+                <p class="scene-desc">Tienes 30 segundos. Demuestra que dominas la inmediatez: Envía un mensaje completo.</p>
+                <div class="mini-game">
+                    <p>Desafío: Envía un mensaje usando tecnología moderna (simulado).</p>
+                    <input type="text" class="message-input" placeholder="Escribe tu mensaje instantáneo..." id="modern-msg">
+                    <button class="btn submit-btn" onclick="sendModernMessage()">Enviar Mensaje 📲</button>
+                    <div class="tech-sim" id="modern-sim"></div>
+                    <div class="feedback" id="feedback-1"></div>
+                </div>
+            </div>
+
+            <!-- Scene 2: Silent Generation -->
+            <div class="scene" data-scene="2">
+                <h2 class="scene-title">1901-1945: Generación Silenciosa</h2>
+                <p class="scene-desc">Tienes 30 segundos. Sintoniza el mensaje: selecciona las 4 palabras clave de la era Radio/Prensa.</p>
+                <div class="mini-game">
+                    <p>Desafío: Sintoniza el mensaje (selecciona las 4 palabras clave de la era).</p>
+                    <div class="puzzle-grid" id="radio-puzzle">
+                        <div class="puzzle-piece" data-correct="true">📻 Radio</div>
+                        <div class="puzzle-piece" data-correct="true">📰 Periódicos</div>
+                        <div class="puzzle-piece">Internet</div>
+                        <div class="puzzle-piece" data-correct="true">Telegrama</div>
+                        <div class="puzzle-piece">TikTok</div>
+                        <div class="puzzle-piece" data-correct="true">Paciencia</div>
+                    </div>
+                    <button class="btn submit-btn" onclick="checkRadioPuzzle()">Verificar Sintonía</button>
+                    <div class="feedback" id="feedback-2"></div>
+                </div>
+            </div>
+
+            <!-- Scene 3: Baby Boomers -->
+            <div class="scene" data-scene="3">
+                <h2 class="scene-title">1946-1964: Baby Boomers</h2>
+                <p class="scene-desc">Tienes 30 segundos. La TV trajo contenido masivo. Selecciona el contenido típico de la televisión de esa era.</p>
+                <div class="mini-game">
+                    <p>Desafío: Selecciona el contenido típico de la televisión de esa era.</p>
+                    <div class="puzzle-grid" id="tv-puzzle">
+                        <div class="puzzle-piece" data-correct="true">Noticias (Centralizadas)</div>
+                        <div class="puzzle-piece" data-correct="true">Series (En Blanco y Negro)</div>
+                        <div class="puzzle-piece">Vlogs</div>
+                        <div class="puzzle-piece" data-correct="true">Deportes en Vivo</div>
+                        <div class="puzzle-piece">Historias de Instagram</div>
+                        <div class="puzzle-piece" data-correct="true">Documentales Largos</div>
+                    </div>
+                    <button class="btn submit-btn" onclick="checkTVPuzzle()">Crear Programación</button>
+                    <div class="feedback" id="feedback-3"></div>
+                </div>
+            </div>
+
+            <!-- Scene 4: Gen X -->
+            <div class="scene" data-scene="4">
+                <h2 class="scene-title">1965-1980: Generación X</h2>
+                <p class="scene-desc">Tienes 30 segundos. El PC requería lógica. Completa el comando para ejecutar el programa.</p>
+                <div class="mini-game">
+                    <p>Desafío: Completa el comando de programación básico para que el ordenador responda.</p>
+                    <div class="tech-sim">
+                        <pre>10 PRINT "Hola, mundo!"</pre>
+                        <input type="text" class="message-input" placeholder="Escribe 'RUN' para ejecutar..." id="code-input">
+                        <button class="btn submit-btn" onclick="runCode()">Ejecutar</button>
+                    </div>
+                    <div class="feedback" id="feedback-4"></div>
+                </div>
+            </div>
+
+            <!-- Scene 5: Millennials -->
+            <div class="scene" data-scene="5">
+                <h2 class="scene-title">1981-1996: Millennials</h2>
+                <p class="scene-desc">Tienes 30 segundos. Internet requería construir comunidad. Selecciona los 4 pilares de una red social sólida.</p>
+                <div class="mini-game">
+                    <p>Desafío: Construye una red social sólida (selecciona los 4 pilares de una comunidad en línea).</p>
+                    <div class="puzzle-grid" id="social-puzzle">
+                        <div class="puzzle-piece" data-correct="true">Conexión</div>
+                        <div class="puzzle-piece" data-correct="true">Contenido Útil</div>
+                        <div class="puzzle-piece">Anonimato Total</div>
+                        <div class="puzzle-piece" data-correct="true">Diálogo (Bidireccional)</div>
+                        <div class="puzzle-piece">Filtros de Perro</div>
+                        <div class="puzzle-piece" data-correct="true">Colaboración</div>
+                    </div>
+                    <button class="btn submit-btn" onclick="buildNetwork()">Conectar Nodos</button>
+                    <div class="feedback" id="feedback-5"></div>
+                </div>
+            </div>
+
+            <!-- Scene 6: Gen Z -->
+            <div class="scene" data-scene="6">
+                <h2 class="scene-title">1997-2012: Generación Z</h2>
+                <p class="scene-desc">Tienes 30 segundos. La atención es clave. Selecciona 4 elementos para crear contenido corto y viral.</p>
+                <div class="mini-game">
+                    <p>Desafío: Crea un video viral (selecciona 4 elementos clave de la cultura de contenido corto).</p>
+                    <div class="puzzle-grid" id="tiktok-puzzle">
+                        <div class="puzzle-piece" data-correct="true">Música Trend</div>
+                        <div class="puzzle-piece" data-correct="true">Edición Rápida</div>
+                        <div class="puzzle-piece">Película 4 horas</div>
+                        <div class="puzzle-piece" data-correct="true">Humor Visual</div>
+                        <div class="puzzle-piece">Carta Formal</div>
+                        <div class="puzzle-piece" data-correct="true">Hashtags</div>
+                    </div>
+                    <button class="btn submit-btn" onclick="createTikTok()">Publicar Contenido</button>
+                    <div class="feedback" id="feedback-6"></div>
+                </div>
+            </div>
+
+            <!-- Scene 7: Gen Alpha -->
+            <div class="scene" data-scene="7">
+                <h2 class="scene-title">2013+: Generación Alpha</h2>
+                <p class="scene-desc">Tienes 30 segundos. Interactúa con la IA para demostrar tu adaptabilidad al aprendizaje inmersivo.</p>
+                <div class="mini-game">
+                    <p>Desafío: Interactúa con el agente IA (pregunta algo que demuestre curiosidad y adaptabilidad).</p>
+                    <input type="text" class="message-input" placeholder="Pregunta a la IA (Ej: ¿Cómo se comunica mi abuelo?)..." id="ai-input">
+                    <button class="btn submit-btn" onclick="askAI()">Preguntar al Agente 🤖</button>
+                    <div class="tech-sim" id="ai-response"></div>
+                    <div class="feedback" id="feedback-7"></div>
+                </div>
+            </div>
+
+            <!-- Scene 8: Bridge Builder -->
+            <div class="scene" data-scene="8">
+                <h2 class="scene-title">¡Misión Cumplida! Construyendo el Puente</h2>
+                <p class="scene-desc">Usaste la empatía tecnológica para entender cada era. Ahora, une los nodos.</p>
+                <div class="bridge">
+                    <div class="generation">Calibración</div>
+                    <div class="bridge-line" id="bridge-0"></div>
+                    <div class="generation">Presente</div>
+                    <div class="bridge-line" id="bridge-1"></div>
+                    <div class="generation">Silenciosa</div>
+                    <div class="bridge-line" id="bridge-2"></div>
+                    <div class="generation">Boomers</div>
+                    <div class="bridge-line" id="bridge-3"></div>
+                    <div class="generation">Gen X</div>
+                    <div class="bridge-line" id="bridge-4"></div>
+                    <div class="generation">Millennials</div>
+                    <div class="bridge-line" id="bridge-5"></div>
+                    <div class="generation">Gen Z</div>
+                    <div class="bridge-line" id="bridge-6"></div>
+                    <div class="generation">Alpha</div>
+                </div>
+                <button class="btn submit-btn" onclick="buildBridges()">Construir Puentes</button>
+                <div class="feedback" id="feedback-8"></div>
+            </div>
+
+            <!-- Scene 9: Reflection -->
+            <div class="scene reflection" data-scene="9">
+                <h2>Certificado de Cronotech: Rango <span id="final-rank">--</span></h2>
+                <p>¡Felicidades, Albert Daniel Gaviria! Has completado la Odisea.</p>
+                <p>Has demostrado ser un **puente humano** capaz de traducir el lenguaje digital entre eras.</p>
+                <p><strong>Puntuación Total:</strong> <span id="final-score-reflection">0</span> puntos.</p>
+                <p><strong>Tiempo de Reacción Total:</strong> <span id="total-time-reflection">0</span> segundos.</p>
+                <button class="btn" onclick="showShare()">Finalizar y Compartir Odisea</button>
+            </div>
+
+            <!-- Scene 10: Share -->
+            <div class="scene share" data-scene="10">
+                <h2>¡Comparte tu Odisea!</h2>
+                <p>Tu **Rango Chronotech** es: <span id="final-rank-share" style="font-size: 1.5em; color: var(--secondary); font-weight: bold;">--</span></p>
+                <p>Invita a un compañero a jugar y discutan cómo las tecnologías de cada generación influyen en la forma en que interactúan hoy.</p>
+                <button class="btn" onclick="copyLink()">Copiar Enlace del Juego</button>
+                <p id="copy-msg" style="display:none; color: var(--secondary); margin-top: 10px;">¡Enlace copiado al portapapeles!</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Chronotech Odyssey - Todos los derechos reservados.</p>
+        <p class="footer-credits">Desarrollado y Fundado por Albert Daniel Gaviria.</p>
+    </footer>
+
+    <script>
+        // --- Global Game State & Config ---
+        let currentScene = 0;
+        let score = 0;
+        let totalTimeElapsed = 0; // NEW: Tracks time spent on successful missions
+        const totalChallengeScenes = 8; 
+        let sceneCompleted = new Array(totalChallengeScenes).fill(false);
+        let gameTimer;
+        let timeRemaining = 0;
+        let missionStartTime = 0; // NEW: To calculate time elapsed for grading
+
+        const TIME_LIMIT = [60, 30, 30, 30, 30, 30, 30, 30]; 
+        
+        const sceneEras = [
+            "Calibración Temporal",
+            "Presente (Alpha/Z)",
+            "Generación Silenciosa",
+            "Baby Boomers",
+            "Generación X",
+            "Millennials",
+            "Generación Z",
+            "Generación Alpha"
+        ];
+
+        const rankTiers = [
+            { scoreMin: 80, timeMax: 1000, name: "Maestro Chronotech 🥇" },
+            { scoreMin: 80, timeMax: 10000, name: "Operador de Élite 🥈" },
+            { scoreMin: 60, timeMax: 10000, name: "Técnico Avanzado 🥉" },
+            { scoreMin: 40, timeMax: 10000, name: "Viajero Cadete" },
+            { scoreMin: 0, timeMax: 10000, name: "Novato Temporal" }
+        ];
+
+        // --- Tone.js Sound System Setup ---
+        // Tone.js requires user interaction to start the audio context.
+        document.body.addEventListener('click', () => {
+            if (Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+        }, {once: true});
+        
+        // Success Tone: Simple poly synth bright chord
+        const successTone = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "square" },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 }
+        }).toDestination();
+
+        // Fail Tone: Noise with low frequency filter
+        const failTone = new Tone.NoiseSynth({
+            noise: { type: "white" },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.2 },
+            filterEnvelope: { attack: 0.001, decay: 0.1, sustain: 0.1, release: 0.2, baseFrequency: 200, octaves: 1.5 }
+        }).toDestination();
+        
+        // Timer Tick Tone: Simple beep (monosynth)
+        const timerTick = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.001, decay: 0.05, sustain: 0.01, release: 0.1 }
+        }).toDestination();
+        
+        function playSuccess() { successTone.triggerAttackRelease(["C5", "E5", "G5"], "8n"); }
+        function playFail() { failTone.triggerAttackRelease("4n"); }
+        function playTick() { timerTick.triggerAttackRelease("C3", "16n"); }
+
+        // --- Core Functions ---
+        
+        function updateHUD(era) {
+            document.getElementById('current-era').textContent = era;
+            updateTimeline();
+        }
+
+        function scrollToElement(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function updateTimeline() {
+            // Update Markers and lines
+            for (let i = 0; i < totalChallengeScenes; i++) {
+                const marker = document.querySelector(`.marker-${i}`);
+                const line = document.querySelector(`.era-${i}`);
+                
+                if (marker) {
+                    marker.classList.remove('active', 'completed');
+                    if (sceneCompleted[i]) {
+                        marker.classList.add('completed');
+                        if (line) line.classList.add('completed');
+                    }
+                    if (i === currentScene) {
+                        marker.classList.add('active');
+                    }
+                }
+            }
+        }
+
+        function updateTimeDisplay() {
+            const timeEl = document.getElementById('time-remaining');
+            timeEl.textContent = timeRemaining;
+            
+            if (timeRemaining <= 10 && timeRemaining > 0) {
+                timeEl.style.animation = 'urgentFlash 1s infinite';
+                playTick(); // Sound effect for urgency
+            } else {
+                timeEl.style.animation = 'none';
+                timeEl.style.color = 'var(--accent)';
+            }
+        }
+
+        function startTimer(sceneIndex) {
+            stopTimer();
+            timeRemaining = TIME_LIMIT[sceneIndex];
+            missionStartTime = Date.now(); // Mark start time for success calculation
+            document.getElementById('progress-container').style.display = 'none'; // Re-hide unused element
+            updateTimeDisplay();
+
+            gameTimer = setInterval(() => {
+                timeRemaining--;
+                updateTimeDisplay();
+
+                if (timeRemaining <= 0) {
+                    stopTimer();
+                    playFail();
+                    showFeedback(`feedback-${currentScene}`, '❌ ¡TIEMPO AGOTADO! La era te ha superado. No obtienes puntos. Viaja a la siguiente era.', false, 4000);
+                    // Penaliza el tiempo total para el ranking, simulando una misión larga y fallida
+                    totalTimeElapsed += TIME_LIMIT[sceneIndex]; 
+                    document.getElementById('time-travel-btn').disabled = false;
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(gameTimer);
+            document.getElementById('time-remaining').style.animation = 'none';
+            document.getElementById('time-remaining').style.color = 'var(--accent)';
+        }
+
+        function setButtonsDisabled(sceneIndex, disabled) {
+            const currentSceneEl = document.querySelector(`[data-scene="${sceneIndex}"]`);
+            if (currentSceneEl) {
+                // Disable all clickable elements in the current scene
+                currentSceneEl.querySelectorAll('.btn, .puzzle-piece, .memory-card').forEach(el => {
+                    el.disabled = disabled;
+                });
+                // Re-enable the start memory button if starting memory game
+                if (sceneIndex === 0) {
+                    document.getElementById('start-memory-btn').disabled = disabled;
+                }
+            }
+        }
+
+        function loadScene(index) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            const nextScene = document.querySelector(`[data-scene="${index}"]`);
+            if (nextScene) {
+                nextScene.classList.add('active');
+                currentScene = index;
+                stopTimer();
+
+                if (index < totalChallengeScenes) {
+                    updateHUD(sceneEras[index]);
+                    setButtonsDisabled(index, false); 
+                    
+                    if (index > 0) {
+                        startTimer(index);
+                    }
+                } else if (index === 8) {
+                    updateHUD("Construyendo Puente");
+                    document.getElementById('time-travel-btn').disabled = true;
+                } else if (index === 9) {
+                    updateHUD("Certificado");
+                    calculateRank();
+                } else {
+                    updateHUD("Odisea Finalizada");
+                }
+                
+                document.getElementById('time-travel-btn').disabled = !sceneCompleted[currentScene] || currentScene >= totalChallengeScenes;
+                window.scrollTo({ top: document.getElementById('game-section').offsetTop, behavior: 'smooth' });
+            }
+        }
+
+        function timeTravel() {
+            if (currentScene < totalChallengeScenes - 1) {
+                if (sceneCompleted[currentScene]) {
+                    loadScene(currentScene + 1);
+                } else {
+                    showFeedback(`feedback-${currentScene}`, '¡Completa el desafío actual para avanzar!', false, 2000);
+                }
+            } else if (currentScene === totalChallengeScenes - 1) { 
+                 if (sceneCompleted[currentScene]) {
+                    loadScene(8); // Go to Bridge Builder
+                } else {
+                    showFeedback(`feedback-${currentScene}`, '¡Completa el desafío actual para avanzar!', false, 2000);
+                }
+            } else if (currentScene === 9) { 
+                loadScene(10); // Go to Share
+            }
+        }
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('score').textContent = score;
+        }
+        
+        function calculateRank() {
+            const successfulTime = totalTimeElapsed / sceneCompleted.filter(c => c).length; // Avg time per successful mission
+            
+            let finalRank = rankTiers.find(tier => {
+                const scoreCheck = score >= tier.scoreMin;
+                // For the top ranks, prioritize score and then speed
+                if (tier.name.includes("Maestro") || tier.name.includes("Élite")) {
+                    return scoreCheck && successfulTime <= 30; // Harder time limit for top ranks
+                }
+                return scoreCheck;
+            });
+
+            if (!finalRank) {
+                finalRank = rankTiers[rankTiers.length - 1]; // Default to Novato
+            }
+
+            document.getElementById('final-score-reflection').textContent = score;
+            document.getElementById('total-time-reflection').textContent = totalTimeElapsed.toFixed(1);
+            document.getElementById('final-rank').textContent = finalRank.name;
+            document.getElementById('final-rank-share').textContent = finalRank.name;
+        }
+
+        function showFeedback(id, msg, success, delay = 2000) {
+            const feedback = document.getElementById(id);
+            if (!feedback) return;
+            
+            stopTimer();
+            
+            feedback.textContent = msg;
+            feedback.className = 'feedback ' + (success ? 'success' : 'error');
+            feedback.style.display = 'block';
+
+            if (success && currentScene < totalChallengeScenes) {
+                // Calculate time elapsed for success
+                const timeTaken = TIME_LIMIT[currentScene] - timeRemaining;
+                totalTimeElapsed += timeTaken;
+                
+                if (!sceneCompleted[currentScene]) {
+                    updateScore(10);
+                    sceneCompleted[currentScene] = true;
+                    updateHUD(sceneEras[currentScene]); 
+                }
+                playSuccess();
+            } else if (!success) {
+                playFail();
+            }
+            
+            setButtonsDisabled(currentScene, true);
+
+            setTimeout(() => {
+                feedback.style.display = 'none';
+                document.getElementById('time-travel-btn').disabled = !sceneCompleted[currentScene];
+
+                if (success && currentScene < totalChallengeScenes) {
+                    loadScene(currentScene + 1);
+                }
+            }, delay);
+        }
+
+        function startGame() {
+            // Reset state
+            currentScene = 0;
+            score = 0;
+            totalTimeElapsed = 0;
+            sceneCompleted = new Array(totalChallengeScenes).fill(false);
+            document.getElementById('score').textContent = score;
+
+            document.getElementById('hero').style.display = 'none';
+            document.getElementById('tutorial').style.display = 'none';
+            document.getElementById('game-section').classList.add('active');
+            
+            loadScene(0); 
+            initializeMemoryGame(false); 
+        }
+        
+        // --- Mini-games Logic ---
+        
+        function setupPuzzleToggle(puzzleId) {
+            const pieces = document.querySelectorAll(`#${puzzleId} .puzzle-piece`);
+            pieces.forEach(p => {
+                p.addEventListener('click', () => {
+                    if (!sceneCompleted[currentScene] && timeRemaining > 0) {
+                        p.classList.toggle('selected');
+                    }
+                });
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setupPuzzleToggle('radio-puzzle');
+            setupPuzzleToggle('tv-puzzle');
+            setupPuzzleToggle('social-puzzle');
+            setupPuzzleToggle('tiktok-puzzle');
+            updateHUD(sceneEras[0]); 
+            document.getElementById('time-travel-btn').disabled = true; 
+        });
+
+        // --- SCENE 0: CALIBRATION (Memory Game) ---
+        const memoryIcons = ["💾", "📞", "📺", "💻", "📲", "📡", "📝", "🖱️"];
+        let cards = [];
+        let flippedCards = [];
+        let matchesFound = 0;
+        let lockBoard = false;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initializeMemoryGame(startTimerNow) {
+            const grid = document.getElementById('memory-grid');
+            const status = document.getElementById('memory-status');
+            const icons = memoryIcons.slice(0, 4); 
+            const gameArray = [...icons, ...icons];
+            shuffle(gameArray);
+
+            grid.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            matchesFound = 0;
+            lockBoard = false;
+            
+            if (!startTimerNow) {
+                status.textContent = "Haz clic en INICIAR para comenzar la Calibración.";
+                document.getElementById('start-memory-btn').style.display = 'block';
+            }
+
+            gameArray.forEach((icon, index) => {
+                const card = document.createElement('div');
+                card.classList.add('memory-card');
+                card.dataset.icon = icon;
+                card.dataset.index = index;
+                card.innerHTML = `
+                    <div class="card-content card-back">?</div>
+                    <div class="card-content card-front">${icon}</div>
+                `;
+                card.addEventListener('click', flipCard);
+                grid.appendChild(card);
+                cards.push(card);
+            });
+            
+            if (startTimerNow) {
+                startTimer(0);
+                status.textContent = "¡Tiempo corre! Busca los pares.";
+                document.getElementById('start-memory-btn').style.display = 'none';
+            }
+        }
+
+        function flipCard(event) {
+            if (lockBoard || sceneCompleted[0] || timeRemaining <= 0) return;
+
+            const card = event.currentTarget;
+            if (card.classList.contains('matched') || card.classList.contains('flipped')) return;
+
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                lockBoard = true;
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.icon === card2.dataset.icon;
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            const [card1, card2] = flippedCards;
+            card1.classList.add('matched');
+            card2.classList.add('matched');
+            card1.removeEventListener('click', flipCard);
+            card2.removeEventListener('click', flipCard);
+            resetBoard();
+
+            matchesFound++;
+            if (matchesFound === 4) {
+                stopTimer();
+                document.getElementById('memory-status').textContent = "¡Calibración exitosa! Memoria lista.";
+                showFeedback('feedback-0', `✅ Calibración completa en ${TIME_LIMIT[0] - timeRemaining} segundos. Puedes avanzar.`, true);
+            }
+        }
+
+        function unflipCards() {
+            setTimeout(() => {
+                flippedCards.forEach(card => {
+                    card.classList.remove('flipped');
+                });
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [flippedCards, lockBoard] = [[], false];
+        }
+
+
+        // --- SCENE 1: Present (Gen Alpha/Z) ---
+        function sendModernMessage() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const msg = document.getElementById('modern-msg').value;
+            if (msg.trim().length >= 5) {
+                document.getElementById('modern-sim').textContent = `[${new Date().toLocaleTimeString()}] Mensaje enviado: "${msg.substring(0, 30)}..." vía app instantánea cifrada. Confirmación de entrega en 0.001s.`;
+                showFeedback('feedback-1', '✅ Mensaje enviado exitosamente. ¡La inmediatez es tu fuerza!', true);
+            } else {
+                showFeedback('feedback-1', '❌ Error: El mensaje es demasiado corto o vacío.', false);
+            }
+        }
+
+        // --- SCENE 2: Silent Generation ---
+        function checkRadioPuzzle() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const selected = document.querySelectorAll('#radio-puzzle .puzzle-piece.selected');
+            const correctSelected = Array.from(selected).filter(p => p.dataset.correct === 'true');
+            
+            if (correctSelected.length === 4 && selected.length === 4) {
+                showFeedback('feedback-2', '✅ Sintonía Lograda. Entiendes el valor de la comunicación paciente.', true);
+            } else {
+                showFeedback('feedback-2', '❌ Error de Frecuencia. Solo 4 opciones son correctas para la radio/prensa de esa era.', false);
+            }
+        }
+
+        // --- SCENE 3: Baby Boomers ---
+        function checkTVPuzzle() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const selected = document.querySelectorAll('#tv-puzzle .puzzle-piece.selected');
+            const correctSelected = Array.from(selected).filter(p => p.dataset.correct === 'true');
+            
+            if (correctSelected.length === 4 && selected.length === 4) {
+                showFeedback('feedback-3', '✅ Programa Creado. Entiendes los medios de difusión visuales y centralizados.', true);
+            } else {
+                showFeedback('feedback-3', '❌ Contenido Inapropiado. Vuelve a seleccionar 4 elementos que dominarían la TV en esa época.', false);
+            }
+        }
+
+        // --- SCENE 4: Gen X ---
+        function runCode() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const code = document.getElementById('code-input').value.trim();
+            if (code.toLowerCase() === 'run') {
+                document.querySelector('#feedback-4').style.display = 'block';
+                document.querySelector('#feedback-4').textContent = '>>> Ejecutando... OK. Output: Hola, mundo!';
+                
+                setTimeout(() => {
+                    showFeedback('feedback-4', '✅ Código Ejecutado. Dominaste la lógica primitiva del PC.', true, 3000);
+                }, 1000);
+            } else {
+                showFeedback('feedback-4', '❌ Error de Comando. El comando simple de ejecución es "RUN".', false);
+            }
+        }
+
+        // --- SCENE 5: Millennials ---
+        function buildNetwork() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const selected = document.querySelectorAll('#social-puzzle .puzzle-piece.selected');
+            const correctSelected = Array.from(selected).filter(p => p.dataset.correct === 'true');
+
+            if (correctSelected.length === 4 && selected.length === 4) {
+                showFeedback('feedback-5', '✅ Red Sólida. Comprendes los pilares de la colaboración y el diálogo en Internet.', true);
+            } else {
+                showFeedback('feedback-5', '❌ Falla en la Conexión. Asegúrate de elegir los 4 pilares de la comunidad real.', false);
+            }
+        }
+
+        // --- SCENE 6: Gen Z ---
+        function createTikTok() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const selected = document.querySelectorAll('#tiktok-puzzle .puzzle-piece.selected');
+            const correctSelected = Array.from(selected).filter(p => p.dataset.correct === 'true');
+
+            if (correctSelected.length === 4 && selected.length === 4) {
+                showFeedback('feedback-6', '✅ ¡Viral! Has adaptado tu mensaje al formato de consumo rápido y visual.', true);
+            } else {
+                showFeedback('feedback-6', '❌ El Video Es Largo. Selecciona 4 elementos para contenido corto y de alta retención.', false);
+            }
+        }
+
+        // --- SCENE 7: Gen Alpha ---
+        function askAI() {
+            if (sceneCompleted[currentScene] || timeRemaining <= 0) return;
+            const question = document.getElementById('ai-input').value.trim();
+            const aiResponseEl = document.getElementById('ai-response');
+            
+            if (question.length > 10) {
+                aiResponseEl.textContent = '🤖 Analizando la pregunta...';
+                
+                setTimeout(() => {
+                    aiResponseEl.textContent = `🤖 IA responde: Tu pregunta ("${question.substring(0, 30)}...") demuestra curiosidad intergeneracional. La clave es: cada herramienta (radio, TV, PC, IA) es solo un *canal*. El mensaje siempre debe ser la empatía.`;
+                    showFeedback('feedback-7', '✅ IA Interactuada. Demostraste adaptabilidad al aprendizaje inmersivo.', true, 3500);
+                }, 1500);
+            } else {
+                showFeedback('feedback-7', '❌ Pregunta Insuficiente. Haz una pregunta significativa que muestre tu entendimiento.', false, 2000);
+            }
+        }
+        
+        // --- SCENE 8: Bridge Builder ---
+        function buildBridges() {
+            const challengesCompleted = sceneCompleted.filter(c => c).length;
+            const bridgesToBuild = challengesCompleted;
+            let success = true;
+
+            if (bridgesToBuild < totalChallengeScenes) {
+                showFeedback('feedback-8', `Puentes incompletos. Solo construiste ${bridgesToBuild} de ${totalChallengeScenes}. Vuelve a los desafíos pendientes.`, false, 4000);
+                success = false;
+            }
+
+            for (let i = 0; i < totalChallengeScenes - 1; i++) { // Only 7 bridges between 8 generations
+                const bridgeEl = document.getElementById(`bridge-${i}`);
+                if (bridgeEl) { 
+                    if (i < bridgesToBuild) {
+                        bridgeEl.classList.add('connected');
+                    } else {
+                        bridgeEl.classList.remove('connected');
+                    }
+                }
+            }
+            
+            if (success) {
+                document.getElementById('feedback-8').textContent = `¡Puentes Finalizados! Has conectado todas las ${totalChallengeScenes} eras.`;
+                document.getElementById('feedback-8').classList.add('success');
+                document.getElementById('feedback-8').style.display = 'block';
+                setTimeout(() => loadScene(9), 3000);
+            }
+        }
+
+        function showShare() {
+            document.getElementById('final-score').textContent = score;
+            loadScene(10);
+        }
+
+        function copyLink() {
+            const el = document.createElement('textarea');
+            el.value = window.location.href;
+            document.body.appendChild(el);
+            el.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    document.getElementById('copy-msg').style.display = 'block';
+                    setTimeout(() => document.getElementById('copy-msg').style.display = 'none', 3000);
+                }
+            } catch (err) {
+                console.error('No se pudo copiar el enlace', err);
+            }
+            document.body.removeChild(el);
+        }
+    </script>
+</body>
+</html>
