@@ -2,7 +2,7 @@ import { db } from './firebase-config.js';
 import { getCurrentUser, isCurrentUserAdmin } from "./auth.js";
 import { showToast } from './notifications.js';
 
-// The main initialization function for the comments module
+// La función principal para inicializar el módulo de comentarios
 export function initComments(user) {
     const commentsCollection = db.collection('comments');
     const commentsList = document.getElementById('comments-container');
@@ -21,8 +21,11 @@ export function initComments(user) {
             commentsList.innerHTML = '<p>Sé el primero en dejar un comentario.</p>';
             return;
         }
-        snapshot.forEach(doc => {
-            commentsList.appendChild(renderComment(doc));
+        snapshot.forEach((doc, index) => {
+            const commentEl = renderComment(doc);
+            // Añadimos un retraso escalonado para la animación
+            commentEl.style.animationDelay = `${index * 100}ms`;
+            commentsList.appendChild(commentEl);
         });
     }, error => {
         console.error("Error al cargar comentarios: ", error);
@@ -30,10 +33,10 @@ export function initComments(user) {
     });
 }
 
-function renderComment(doc) {
+async function renderComment(doc) {
     const data = doc.data();
     const user = getCurrentUser();
-    const isAdmin = isCurrentUserAdmin();
+    const isAdmin = await isCurrentUserAdmin(); // Es asíncrona ahora
     const li = document.createElement('div');
     li.className = 'comment';
     const isLiked = user && data.likes && data.likes[user.uid];
@@ -48,7 +51,7 @@ function renderComment(doc) {
             <div class="comment-actions">
                 <button class="like-btn ${isLiked ? 'active' : ''}">❤️ ${data.likeCount || 0}</button>
                 <button class="reply-btn">Responder</button>
-                ${(user && user.uid === data.uid) || isAdmin ? '<button class="delete-btn">Eliminar</button>' : ''}
+                ${(user && user.uid === data.uid) || isAdmin ? `<button class="delete-btn" data-comment-id="${doc.id}">Eliminar</button>` : ''}
             </div>
             <div class="reply-form-container"></div>
             <div class="replies-list"></div>
@@ -59,7 +62,6 @@ function renderComment(doc) {
     li.querySelector('.reply-btn').addEventListener('click', (e) => toggleReplyForm(e, doc.id));
     const deleteBtn = li.querySelector('.delete-btn');
     if (deleteBtn) {
-        deleteBtn.dataset.commentId = doc.id;
         deleteBtn.addEventListener('click', handleDeleteClick);
     }
 
@@ -75,10 +77,10 @@ function renderComment(doc) {
     return li;
 }
 
-function renderReply(doc, parentId) {
+async function renderReply(doc, parentId) {
     const data = doc.data();
     const user = getCurrentUser();
-    const isAdmin = isCurrentUserAdmin();
+    const isAdmin = await isCurrentUserAdmin();
     const li = document.createElement('div');
     li.className = 'comment reply';
     const photoURL = data.photoURL || `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="15" fill="#${hashCode(data.uid || 'default')}"/><text x="50%" y="50%" style="fill:#fff;font-size:15px;font-family:sans-serif;text-anchor:middle;dominant-baseline:central">${escapeHTML(data.name[0] || '?')}</text></svg>`)}`;
@@ -88,14 +90,12 @@ function renderReply(doc, parentId) {
         <div class="comment-body">
             <p class="comment-author">${escapeHTML(data.name)}</p>
             <p>${escapeHTML(data.text)}</p>
-            ${(user && user.uid === data.uid) || isAdmin ? '<div class="comment-actions"><button class="delete-reply-btn">Eliminar</button></div>' : ''}
+            ${(user && user.uid === data.uid) || isAdmin ? `<div class="comment-actions"><button class="delete-reply-btn" data-parent-id="${parentId}" data-reply-id="${doc.id}">Eliminar</button></div>` : ''}
         </div>
     `;
 
     const deleteBtn = li.querySelector('.delete-reply-btn');
     if (deleteBtn) {
-        deleteBtn.dataset.parentId = parentId;
-        deleteBtn.dataset.replyId = doc.id;
         deleteBtn.addEventListener('click', handleDeleteClick);
     }
     return li;
@@ -114,6 +114,7 @@ async function handleCommentSubmit(e) {
         await db.collection('comments').add({ name: user.displayName, text, uid: user.uid, photoURL: user.photoURL, timestamp: firebase.firestore.FieldValue.serverTimestamp(), likes: {}, likeCount: 0 });
         textarea.value = '';
         showToast('Comentario publicado', 'success');
+        await checkForumAchievements(user.uid);
     } catch (error) { console.error("Error: ", error); showToast('No se pudo publicar', 'error');
     } finally { submitBtn.disabled = false; }
 }
@@ -157,12 +158,11 @@ function handleLike(commentId) {
     }).catch(err => { console.error(err); showToast('No se pudo procesar el like.', 'error'); });
 }
 
-// New delete handler that prevents browser blocking
 function handleDeleteClick(event) {
-    const button = event.target;
+    const button = event.target.closest('button');
     const { commentId, parentId, replyId } = button.dataset;
 
-    if (button.dataset.confirmed === 'true') {
+    if (confirm('¿Seguro que quieres eliminar este comentario?')) {
         const docRef = replyId 
             ? db.collection('comments').doc(parentId).collection('replies').doc(replyId) 
             : db.collection('comments').doc(commentId);
@@ -170,20 +170,44 @@ function handleDeleteClick(event) {
         docRef.delete()
             .then(() => showToast('Eliminado correctamente.', 'info'))
             .catch(err => { console.error(err); showToast('No se pudo eliminar.', 'error'); });
-    } else {
-        // First click, ask for confirmation
-        button.textContent = 'Confirmar Borrado';
-        button.style.color = 'var(--accent-neon-magenta)';
-        button.dataset.confirmed = 'true';
+    }
+}
 
-        // Set a timeout to revert the button
-        setTimeout(() => {
-            if (document.body.contains(button)) {
-                button.textContent = 'Eliminar';
-                button.style.color = '';
-                delete button.dataset.confirmed;
-            }
-        }, 3000);
+async function checkForumAchievements(userId) {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const userComments = await db.collection('comments').where('uid', '==', userId).get();
+    const commentsCount = userComments.size;
+    const userAchievementsRef = db.collection('users').doc(userId).collection('unlockedAchievements');
+    
+    const forumAchievements = {
+      'forum_1': { name: 'Primer Contacto', description: 'Publica tu primer comentario.', icon: 'fas fa-comments' },
+      'forum_5': { name: 'Voz de la Comunidad', description: 'Publica 5 comentarios.', icon: 'fas fa-bullhorn' }
+    };
+
+    if (commentsCount >= 1) {
+        const achievementRef = userAchievementsRef.doc('forum_1');
+        const doc = await achievementRef.get();
+        if(!doc.exists) {
+            await achievementRef.set({
+                ...forumAchievements['forum_1'],
+                unlockedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('¡Logro desbloqueado: Primer Contacto!', 'success');
+        }
+    }
+
+    if (commentsCount >= 5) {
+        const achievementRef = userAchievementsRef.doc('forum_5');
+        const doc = await achievementRef.get();
+        if(!doc.exists) {
+            await achievementRef.set({
+                ...forumAchievements['forum_5'],
+                unlockedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('¡Logro desbloqueado: Voz de la Comunidad!', 'success');
+        }
     }
 }
 
@@ -208,7 +232,6 @@ function hashCode(str) {
     return color.substring(1, 7);
 }
 
-// Add styles on module load
 const style = document.createElement('style');
 style.innerHTML = `
     .comment, .reply { display: flex; gap: 1rem; margin-bottom: 1.5rem; }

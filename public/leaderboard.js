@@ -1,6 +1,6 @@
 import { db } from './firebase-config.js';
 
-// The main initialization function for the leaderboard module
+// La función principal para inicializar el leaderboard
 export function initLeaderboard() {
     const leaderboardList = document.getElementById('leaderboard-list');
     const loading = document.getElementById('leaderboard-loading');
@@ -22,8 +22,11 @@ export function initLeaderboard() {
 
         leaderboardList.innerHTML = '';
         let rank = 1;
-        snapshot.forEach(doc => {
-            leaderboardList.appendChild(renderLeaderboardItem(doc.data(), rank++));
+        snapshot.forEach((doc, index) => {
+            const item = renderLeaderboardItem(doc.data(), rank++);
+            // Añadimos un retraso escalonado para la animación
+            item.style.animationDelay = `${index * 100}ms`;
+            leaderboardList.appendChild(item);
         });
 
     }, error => {
@@ -69,10 +72,10 @@ function hashCode(str) {
     return color.substring(1, 7);
 }
 
-// Add styles for the avatar
+// Añadir estilos para el avatar
 const style = document.createElement('style');
 style.innerHTML = `
-    li {
+    #leaderboard-list li {
         display: flex;
         align-items: center;
         gap: 1rem;
