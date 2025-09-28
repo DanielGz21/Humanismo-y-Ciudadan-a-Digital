@@ -2,7 +2,6 @@ import { db } from './firebase-config.js';
 import { startGame } from './script.js';
 
 export function initQuizSelection() {
-    console.log(document.body.innerHTML);
     const quizListContainer = document.getElementById('quiz-list-container');
     const quizSelectionSection = document.getElementById('quiz-selection');
     const heroSection = document.getElementById('hero');

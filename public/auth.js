@@ -3,7 +3,8 @@ import { showProfileSection } from './profile.js';
 import { showToast } from './notifications.js';
 
 let currentUser = null;
-const ADMIN_UIDS = ['D4QP7hTeRERO4ZLC6DD532fyIfY2'];
+// Definimos el email del administrador principal en una constante para fácil mantenimiento.
+const ADMIN_EMAIL = 'clauger2109@gmail.com';
 
 // This is the new main initialization function for the auth module.
 export function initAuth(onAuthStateReady) {
@@ -14,7 +15,6 @@ export function initAuth(onAuthStateReady) {
         } else {
             renderLoggedOut();
         }
-        // This callback notifies the main app that the auth state is known.
         if (onAuthStateReady) {
             onAuthStateReady(user);
         }
@@ -25,9 +25,14 @@ export function getCurrentUser() {
     return currentUser;
 }
 
-export function isCurrentUserAdmin() {
-    return currentUser && ADMIN_UIDS.includes(currentUser.uid);
+// Esta función ahora depende de los datos en Firestore, lo cual es más seguro y flexible.
+export async function isCurrentUserAdmin() {
+    if (!currentUser) return false;
+    const userRef = db.collection('users').doc(currentUser.uid);
+    const doc = await userRef.get();
+    return doc.exists && doc.data().isAdmin === true;
 }
+
 
 function renderLoggedIn(user) {
     const authContainer = document.getElementById('auth-container');
@@ -54,7 +59,6 @@ function renderLoggedOut() {
 }
 
 function showLoginModal() {
-    // Check if modal already exists
     if (document.getElementById('login-modal')) {
         document.getElementById('login-modal').style.display = 'flex';
         return;
@@ -77,7 +81,6 @@ function showLoginModal() {
     `;
     document.body.appendChild(modal);
 
-    // Add event listeners
     modal.querySelector('.close-btn').addEventListener('click', () => {
         modal.style.display = 'none';
     });
@@ -115,7 +118,6 @@ function signInWithProvider(providerName) {
 
     auth.signInWithPopup(provider)
         .then(result => {
-            // Close the modal on successful login
             const modal = document.getElementById('login-modal');
             if (modal) {
                 modal.style.display = 'none';
@@ -125,6 +127,7 @@ function signInWithProvider(providerName) {
             if (isNewUser) {
                 showToast(`¡Bienvenido, ${result.user.displayName}!`, 'success');
             }
+            // Llamamos a la función que ahora asignará el rol de admin si corresponde
             createUserProfileIfNotExists(result.user);
         })
         .catch(error => {
@@ -140,10 +143,15 @@ function signOutUser() {
     }).catch(error => console.error('Error durante el cierre de sesión:', error.message));
 }
 
+// --- FUNCIÓN MODIFICADA ---
 function createUserProfileIfNotExists(user) {
     const userRef = db.collection('users').doc(user.uid);
     userRef.get().then(doc => {
+        // --- LÓGICA DE ADMINISTRADOR AÑADIDA ---
+        const isAdmin = user.email === ADMIN_EMAIL;
+
         if (!doc.exists) {
+            // Si el usuario es nuevo, creamos su perfil
             userRef.set({
                 uid: user.uid,
                 displayName: user.displayName,
@@ -151,12 +159,19 @@ function createUserProfileIfNotExists(user) {
                 photoURL: user.photoURL,
                 rank: 'Novato',
                 score: 0,
-                currentQuestionIndex: 0,
+                isAdmin: isAdmin, // Añadimos el campo isAdmin
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+        } else {
+            // Si el usuario ya existe, nos aseguramos de que tenga el campo isAdmin correcto
+            // Esto es útil si el usuario ya existía antes de implementar esta lógica
+            if (isAdmin && !doc.data().isAdmin) {
+                userRef.update({ isAdmin: true });
+            }
         }
     });
 }
+
 
 // Inject styles once on module load
 const style = document.createElement('style');

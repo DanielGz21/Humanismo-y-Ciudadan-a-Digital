@@ -1,5 +1,7 @@
 import { db } from './firebase-config.js';
 import { getCurrentUser } from './auth.js';
+import { showToast } from './notifications.js';
+import { showAvatarSelection } from './avatars.js'; // Importamos la nueva función
 
 // Function to show a specific section and hide others
 function showSection(sectionId) {
@@ -57,6 +59,60 @@ async function renderProgressChart() {
     });
 }
 
+// NUEVA FUNCIÓN: Maneja la lógica para habilitar la edición del nombre
+function enableNameEditing(data) {
+    const nameElement = document.querySelector('.profile-name');
+    const nameContainer = nameElement.parentElement;
+
+    const editContainer = document.createElement('div');
+    editContainer.className = 'edit-name-container';
+    editContainer.innerHTML = `
+        <input type="text" id="edit-name-input" class="edit-name-input" value="${data.displayName}">
+        <button id="save-name-btn" class="btn btn-primary">Guardar</button>
+    `;
+
+    nameContainer.replaceChild(editContainer, nameElement);
+    
+    // Move the edit button inside the new container to replace it as well.
+    const editButton = document.getElementById('edit-name-btn');
+    if(editButton) editButton.style.display = 'none';
+
+
+    document.getElementById('save-name-btn').addEventListener('click', async () => {
+        const newName = document.getElementById('edit-name-input').value.trim();
+        if (newName && newName !== data.displayName) {
+            await updateUserProfileName(newName);
+        } else {
+            loadProfileData();
+        }
+    });
+}
+
+// NUEVA FUNCIÓN: Actualiza el nombre del usuario en Firebase Auth y Firestore
+async function updateUserProfileName(newName) {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const userRef = db.collection('users').doc(user.uid);
+
+    try {
+        await user.updateProfile({
+            displayName: newName
+        });
+
+        await userRef.update({
+            displayName: newName
+        });
+
+        showToast('¡Nombre actualizado con éxito!', 'success');
+        loadProfileData(); 
+        setTimeout(() => window.location.reload(), 1500); 
+    } catch (error) {
+        console.error("Error al actualizar el nombre:", error);
+        showToast('No se pudo actualizar el nombre.', 'error');
+    }
+}
+
 // Fetches and renders the user's profile data
 async function loadProfileData() {
     const user = getCurrentUser();
@@ -73,8 +129,11 @@ async function loadProfileData() {
             const data = doc.data();
             profileContainer.innerHTML = `
                 <div class="profile-card">
-                    <img src="${data.photoURL}" alt="Avatar" class="profile-avatar">
-                    <h3 class="profile-name">${data.displayName}</h3>
+                    <img src="${data.photoURL}" alt="Avatar" class="profile-avatar" id="avatar-btn" style="cursor: pointer;" title="Haz clic para cambiar tu avatar">
+                    <div class="profile-name-container">
+                         <h3 class="profile-name">${data.displayName}</h3>
+                         <button id="edit-name-btn" class="btn-icon" title="Editar nombre"><i class="fas fa-pencil-alt"></i></button>
+                    </div>
                     <div class="profile-stats">
                         <div class="stat-item">
                             <span class="stat-label">Rango</span>
@@ -95,8 +154,13 @@ async function loadProfileData() {
             document.getElementById('close-profile-btn').addEventListener('click', () => {
                 window.location.reload();
             });
+            
+            document.getElementById('edit-name-btn').addEventListener('click', () => enableNameEditing(data));
+            
+            // NUEVO: Listener para el botón del avatar
+            document.getElementById('avatar-btn').addEventListener('click', showAvatarSelection);
 
-            renderProgressChart(); // Call the new function
+            renderProgressChart();
         } else {
             profileContainer.innerHTML = '<p>No se encontró el perfil de usuario.</p>';
         }
@@ -109,7 +173,6 @@ async function loadProfileData() {
 // Main function to be called from other modules
 export function initProfile() {
     // This function is called to ensure event listeners are set up.
-    // The actual listeners are now added in auth.js where the elements are created.
 }
 
 // This function will be called by the event listener in auth.js
@@ -138,11 +201,44 @@ style.innerHTML = `
         border: 4px solid var(--accent-neon-cyan);
         margin-bottom: 1rem;
     }
+    .profile-name-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
     .profile-name {
         font-family: var(--font-display);
         font-size: 2rem;
         color: var(--primary-color);
-        margin-bottom: 1.5rem;
+        margin: 0;
+    }
+    .btn-icon {
+        background: none;
+        border: none;
+        color: var(--text-secondary-color);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color var(--transition-speed);
+    }
+    .btn-icon:hover {
+        color: var(--accent-neon-cyan);
+    }
+    .edit-name-container {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .edit-name-input {
+        flex-grow: 1;
+        background-color: var(--background-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+        font-size: 1.2rem;
+        color: var(--text-color);
+        font-family: var(--font-primary);
     }
     .profile-stats {
         display: flex;

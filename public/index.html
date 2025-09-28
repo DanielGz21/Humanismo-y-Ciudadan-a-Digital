@@ -23,20 +23,22 @@
                     <li><a href="#game">Juego</a></li>
                     <li><a href="#leaderboard-section">Salón de Honor</a></li>
                     <li><a href="#comments-section">Foro</a></li>
+                    <li id="admin-link-container" style="display: none;"><a href="#admin-section">Admin</a></li>
                 </ul>
             </nav>
             <button id="menu-btn" class="menu-btn" aria-label="Abrir menú">
                 <i class="fas fa-bars"></i>
             </button>
             <div id="auth-container">
-                <!-- Contenido de autenticación se insertará aquí -->
-            </div>
+                </div>
         </div>
     </header>
 
     <main>
         <section id="hero">
             <div class="hero-content">
+                <div id="mission-container" class="mission-container" style="display: none;">
+                    </div>
                 <h1>Un Viaje a Través del Humanismo y la Ciudadanía Digital</h1>
                 <p>Pon a prueba tu conocimiento, compite por el primer lugar y comparte tus ideas en nuestra comunidad.</p>
                 <a href="#game" id="start-adventure-btn" class="btn btn-primary">Comenzar el Desafío</a>
@@ -46,8 +48,7 @@
         <section id="quiz-selection" style="display: none;">
             <h2 class="section-title">Elige un Desafío</h2>
             <div id="quiz-list-container">
-                <!-- Los quizzes se cargarán aquí dinámicamente -->
-            </div>
+                </div>
         </section>
 
         <section id="game" style="display: none;">
@@ -87,7 +88,38 @@
         <section id="profile-section" style="display: none;">
             <h2 class="section-title">Perfil de Agente</h2>
             <div id="profile-container">
-                <!-- El contenido del perfil se cargará aquí -->
+                </div>
+        </section>
+
+        <section id="admin-section" style="display: none;">
+            <h2 class="section-title">Panel de Administración</h2>
+            
+            <div class="admin-nav">
+                <button id="admin-nav-quizzes" class="admin-nav-btn active">Gestionar Quizzes</button>
+                <button id="admin-nav-users" class="admin-nav-btn">Gestionar Usuarios</button>
+            </div>
+
+            <div id="admin-quizzes-content" class="admin-tab-content">
+                <div class="admin-container">
+                    <div class="admin-sidebar">
+                        <h3>Quizzes</h3>
+                        <div id="admin-quiz-list"></div>
+                        <button id="add-quiz-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Crear Nuevo Quiz</button>
+                    </div>
+                    <div id="admin-quiz-form-container" class="admin-content" style="display: none;">
+                        </div>
+                </div>
+            </div>
+
+            <div id="admin-users-content" class="admin-tab-content" style="display: none;">
+                 <div class="admin-container">
+                    <div class="admin-sidebar">
+                        <h3>Usuarios</h3>
+                        <div id="admin-user-list"></div>
+                    </div>
+                    <div id="admin-user-form-container" class="admin-content" style="display: none;">
+                        </div>
+                </div>
             </div>
         </section>
     </main>
@@ -96,12 +128,10 @@
         <p>&copy; 2025 Albert Daniel Gaviria Zapata - Humanismo y Ciudadanía Digital.</p>
     </footer>
 
-    <!-- Scripts de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
 
-    <!-- Main App Entry Point -->
     <script type="module" src="app.js"></script>
 
 </body>
