@@ -13,8 +13,16 @@
 </head>
 <body>
     <header>
-        CHRONOTECH ODYSSEY: BRIDGE BUILDER SIMULATOR 
-        <div class="footer-credits">Desarrollado por: Albert Daniel Gaviria - Chronotech Founder</div>
+        <div class="header-content">
+            <div class="logo-area">
+                CHRONOTECH ODYSSEY
+                <span class="dev-tag">By Albert Gaviria</span>
+            </div>
+            <div class="auth-area">
+                <div id="user-profile" style="display: none;"></div>
+                <button id="signin-btn" class="btn auth-btn">Iniciar Sesión</button>
+            </div>
+        </div>
     </header>
 
     <!-- 1. Hero Section -->
@@ -26,7 +34,7 @@
         </div>
     </section>
     
-    <!-- 2. Tutorial Section (NUEVO) -->
+    <!-- 2. Tutorial Section -->
     <section id="tutorial">
         <div class="container">
             <h2>MANUAL DE OPERACIONES CHRONOTECH</h2>
@@ -259,14 +267,19 @@
                 <div class="feedback" id="feedback-8"></div>
             </div>
 
-            <!-- Scene 9: Reflection -->
+            <!-- Scene 9: Reflection & Score Submission -->
             <div class="scene reflection" data-scene="9">
                 <h2>Certificado de Cronotech: Rango <span id="final-rank">--</span></h2>
-                <p>¡Felicidades, Albert Daniel Gaviria! Has completado la Odisea.</p>
-                <p>Has demostrado ser un **puente humano** capaz de traducir el lenguaje digital entre eras.</p>
+                <p>¡Felicidades, <span id="player-final-name">Viajero</span>! Has completado la Odisea.</p>
                 <p><strong>Puntuación Total:</strong> <span id="final-score-reflection">0</span> puntos.</p>
                 <p><strong>Tiempo de Reacción Total:</strong> <span id="total-time-reflection">0</span> segundos.</p>
-                <button class="btn" onclick="showShare()">Finalizar y Compartir Odisea</button>
+                
+                <div id="submit-score-form">
+                    <input type="text" id="player-name-input" class="message-input" placeholder="Tu nombre para el Salón de la Fama...">
+                    <button class="btn" onclick="submitScore()">Inscribir en Salón de la Fama</button>
+                </div>
+                
+                <button class="btn" onclick="showShare()" id="show-share-btn" style="display:none;">Finalizar y Compartir</button>
             </div>
 
             <!-- Scene 10: Share -->
@@ -280,6 +293,23 @@
         </div>
     </section>
     
+    <!-- Leaderboard Section -->
+    <section id="leaderboard-section">
+        <div class="container">
+            <h2>🏆 Salón de la Fama de Chronotech</h2>
+            <p class="scene-desc">Los mejores viajeros del tiempo que han completado la Odisea.</p>
+            
+            <div id="leaderboard-loading">
+                <div class="spinner"></div>
+                <p>Cargando el Salón de la Fama...</p>
+            </div>
+
+            <ol id="leaderboard-list"></ol>
+
+            <p id="no-scores-message" style="display: none;">Aún no hay puntuaciones. ¡Sé el primero en dejar tu marca!</p>
+        </div>
+    </section>
+
     <!-- Comments Section -->
     <section id="comments-section">
         <div class="comments-container">
@@ -315,7 +345,9 @@
         <p class="footer-credits">Desarrollado y Fundado por Albert Daniel Gaviria.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js" type="module"></script>
     <script src="comments.js" type="module"></script>
+    <script src="leaderboard.js" type="module"></script>
+    <script src="auth.js" type="module"></script>
 </body>
 </html>
