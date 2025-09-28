@@ -1,20 +1,7 @@
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { db } from './firebase-config.js'; // Import centralized db
 
-// --- Firebase Initialization ---
-const firebaseConfig = {
-    apiKey: "AIzaSyCCwYwEHGqy7bee1KiCwkKTJh6YZettHIM",
-    authDomain: "chronotechcomments.firebaseapp.com",
-    projectId: "chronotechcomments",
-    storageBucket: "chronotechcomments.appspot.com",
-    messagingSenderId: "651005636861",
-    appId: "1:651005636861:web:ed73d2ec131535fd6e0e94",
-    measurementId: "G-XDNLGB2L77"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const leaderboardCollection = collection(db, 'leaderboard');
 
 // --- Public Function to Submit Score ---

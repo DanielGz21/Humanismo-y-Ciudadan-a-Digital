@@ -1,55 +1,9 @@
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, doc, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, doc, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { db } from './firebase-config.js'; // Import centralized db
 import { getCurrentUser, isCurrentUserAdmin } from "./auth.js";
 
-// Firebase config
-const firebaseConfig = {
-    apiKey: "AIzaSyCCwYwEHGqy7bee1KiCwkKTJh6YZettHIM",
-    authDomain: "chronotechcomments.firebaseapp.com",
-    projectId: "chronotechcomments",
-    storageBucket: "chronotechcomments.appspot.com",
-    messagingSenderId: "651005636861",
-    appId: "1:651005636861:web:ed73d2ec131535fd6e0e94",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const commentsCollection = collection(db, 'comments');
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Main comment submission logic...
-    const commentForm = document.getElementById('comment-form');
-    if (commentForm) { /* ... same as before ... */ }
-
-    // Real-time listener for comments and replies
-    const q = query(commentsCollection, orderBy('timestamp', 'desc'));
-    onSnapshot(q, (snapshot) => {
-        const commentsList = document.getElementById('comments-list');
-        document.getElementById('comments-loading').style.display = 'none';
-        const noCommentsMessage = document.getElementById('no-comments-message');
-        if (snapshot.empty) {
-            noCommentsMessage.style.display = 'block';
-            commentsList.innerHTML = '';
-        } else {
-            noCommentsMessage.style.display = 'none';
-            commentsList.innerHTML = ''; // Clear before re-rendering
-            snapshot.forEach(commentDoc => {
-                const commentLi = renderComment(commentDoc);
-                commentsList.appendChild(commentLi);
-
-                const repliesListEl = commentLi.querySelector('.replies-list');
-                const repliesQuery = query(collection(db, 'comments', commentDoc.id, 'replies'), orderBy('timestamp', 'asc'));
-                onSnapshot(repliesQuery, (replySnapshot) => {
-                    repliesListEl.innerHTML = '';
-                    replySnapshot.forEach(replyDoc => {
-                        repliesListEl.appendChild(renderReply(replyDoc, commentDoc.id));
-                    });
-                });
-            });
-        }
-    });
-});
 
 // --- Actions (Like, Reply, Delete) ---
 const handleLikeClick = async (commentId) => { /* ... same as before ... */ };
@@ -97,7 +51,19 @@ function renderComment(doc) {
 
     // Add event listeners
     li.querySelector('.like-btn').addEventListener('click', () => handleLikeClick(doc.id));
-    li.querySelector('.reply-btn').addEventListener('click', (e) => { /* ... reply form logic ... */ });
+    li.querySelector('.reply-btn').addEventListener('click', (e) => {
+    const container = e.target.closest('.comment-content').querySelector('.reply-form-container');
+    if (container.innerHTML === '') {
+        const replyForm = document.createElement('form');
+        replyForm.className = 'reply-form';
+        replyForm.innerHTML = `<textarea class="reply-textarea" placeholder="Escribe una respuesta..." required></textarea><button type="submit" class="btn">Publicar</button>`;
+        replyForm.addEventListener('submit', (e) => handleReplySubmit(e, doc.id));
+        container.appendChild(replyForm);
+    } else {
+        const form = container.querySelector('form');
+        form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+    }
+});
     if (isAdmin) {
         li.querySelector('.delete-btn').addEventListener('click', () => handleDelete(doc.id));
     }
@@ -129,10 +95,6 @@ function renderReply(doc, parentCommentId) {
 }
 
 // --- Utility Functions ---
-function timeAgo(date) { /* ... */ }
-function escapeHTML(str = '') { /* ... */ }
-
-// Re-implementing functions that might have been lost in the summary
 function timeAgo(date) {
     if (!date) return 'justo ahora';
     const seconds = Math.floor((new Date() - date) / 1000);
@@ -201,18 +163,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-});
-
-li.querySelector('.reply-btn').addEventListener('click', (e) => {
-    const container = e.target.closest('.comment-content').querySelector('.reply-form-container');
-    if (container.innerHTML === '') {
-        const replyForm = document.createElement('form');
-        replyForm.className = 'reply-form';
-        replyForm.innerHTML = `<textarea class="reply-textarea" placeholder="Escribe una respuesta..." required></textarea><button type="submit" class="btn">Publicar</button>`;
-        replyForm.addEventListener('submit', (e) => handleReplySubmit(e, doc.id));
-        container.appendChild(replyForm);
-    } else {
-        const form = container.querySelector('form');
-        form.style.display = form.style.display === 'none' ? 'flex' : 'none';
-    }
 });
