@@ -3,357 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronotech Odyssey: Puente Generacional - Albert Gaviria Edition</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <title>Humanismo y Ciudadanía Digital: La Odisea</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="welcome-gate">
-        <div id="stars"></div>
-        <div id="stars2"></div>
-        <div id="stars3"></div>
-        <h1 class="welcome-title">Chronotech Odyssey</h1>
-        <p class="welcome-subtitle">Viaja a través de las generaciones, domina sus tecnologías y construye puentes digitales para unir el mundo.</p>
-        <button id="login-button" class="btn-welcome">Iniciar Sesión para Comenzar</button>
-    </div>
-
-    <div id="main-content">
-        <header>
-            <div class="header-content">
-                <div class="logo-area">
-                    CHRONOTECH ODYSSEY
-                    <span class="dev-tag">By Albert Gaviria</span>
-                </div>
-                <div class="auth-area">
-                    <div id="user-profile" style="display: none;"></div>
-                    <button id="signin-btn" class="btn auth-btn">Iniciar Sesión</button>
-                </div>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <a href="#">Odisea Digital</a>
             </div>
-        </header>
-
-        <section id="mission-briefing" style="display: none;">
-            <div class="container">
-                <h2 class="title">INFORME DE MISIÓN: AGENTE TEMPORAL</h2>
-                <p class="scene-desc">Saludos, Agente. Has sido seleccionado para la <strong>Operación "Puente Generacional"</strong>.</p>
-                <div class="briefing-content">
-                    <p>Tu misión: viajarás a través de las eras tecnológicas del siglo XX y XXI. En cada período, enfrentarás un desafío que pondrá a prueba tu capacidad para comprender y comunicarte.</p>
-                    <p>El objetivo final es construir "puentes" de empatía y conocimiento entre las generaciones. El éxito de la comunicación intergeneracional depende de ti.</p>
-                    <p>Por favor, confirma tu nombre de agente para iniciar la calibración temporal.</p>
-                    <div class="form-group">
-                        <input type="text" id="player-name-input-briefing" placeholder="Introduce tu nombre de agente...">
-                        <button class="btn" id="confirm-name-btn">Confirmar Identidad</button>
-                    </div>
-                </div>
+            <nav>
+                <ul>
+                    <li><a href="#game">Juego</a></li>
+                    <li><a href="#leaderboard-section">Salón de Honor</a></li>
+                    <li><a href="#comments-section">Foro</a></li>
+                </ul>
+            </nav>
+            <div id="auth-container">
+                <!-- Contenido de autenticación se insertará aquí -->
             </div>
-        </section>
+        </div>
+    </header>
 
+    <main>
         <section id="hero">
-            <div class="container">
-                <h1 class="title">🚀 Chronotech Odyssey</h1>
-                <p class="subtitle">¡El futuro de la comunicación depende de tu empatía tecnológica!</p>
-                <button class="btn" id="show-tutorial-btn">Ver Tutorial</button>
-            </div>
-        </section>
-        
-        <section id="tutorial">
-            <div class="container">
-                <h2>MANUAL DE OPERACIONES CHRONOTECH</h2>
-                <p class="scene-desc">Este manual es un resumen inteligente para asegurar la eficiencia de tu misión.</p>
-                
-                <div class="tutorial-grid">
-                    
-                    <div class="guide-card animate-on-scroll">
-                        <h3>¿Qué Hace el Proyecto?</h3>
-                        <p>Simula un viaje a través de 8 eras generacionales de la tecnología, desde 1901 hasta la actualidad (Alpha/Z). El objetivo es que, al interactuar con los desafíos de cada época, el jugador desarrolle <strong>empatía tecnológica</strong> y habilidades de comunicación adaptable.</p>
-                        <p><strong>El resultado:</strong> Eres un <strong>Maestro Cronotech</strong>, capaz de comunicarte eficazmente con cualquier generación.</p>
-                    </div>
-
-                    <div class="guide-card animate-on-scroll">
-                        <h3>Cómo se Juega (La Aventura)</h3>
-                        <ol>
-                            <li><strong>Inicio:</strong> La misión comienza con el módulo de <strong>Calibración Temporal</strong> (Juego de Memoria).</li>
-                            <li><strong>Duración:</strong> Supera los 7 desafíos de era restantes (Presente, Silenciosa, Boomers, X, Millennials, Z, Alpha).</li>
-                            <li><strong>Éxito:</strong>Responde correctamente a la pregunta o supera la prueba de destreza. Obtienes 10 puntos y un sonido de éxito.</li>
-                            <li><strong>Avance:</strong> El botón 'Viajar a Siguiente Era' se activa automáticamente al completar el desafío.</li>
-                        </ol>
-                    </div>
-
-                    <div class="guide-card animate-on-scroll">
-                        <h3>El CHRONO-METER y el Riesgo</h3>
-                        <p><strong>¿Qué Pasa si SÍ?:</strong> Si completas la misión antes de que el <strong>Chrono-Meter</strong> llegue a cero, obtienes los 10 puntos y avanzas. Tu tiempo restante se suma a tu <strong>Puntuación de Eficiencia</strong>, lo que mejora tu rango final.</p>
-                        <p><strong>¿Qué Pasa si NO?:</strong> Si el tiempo se agota, suena la alarma de fallo. Pierdes el desafío (0 puntos) y se te penaliza en el tiempo total. El botón 'Viajar a Siguiente Era' se habilita forzosamente para que puedas continuar, pero afectará tu <strong>Rango Chronotech</strong>.</p>
-                    </div>
-
-                    <div class="guide-card animate-on-scroll">
-                        <h3>Lo que NO se Hace</h3>
-                        <ul>
-                            <li><strong>No te Demores:</strong> El Chrono-Meter es real. Los desafíos de Selección (Radio/TV/Social/TikTok) deben hacerse con velocidad.</li>
-                            <li><strong>No Clickees al Azar:</strong> Los juegos de selección tienen penalizaciones implícitas; si te equivocas, pierdes tiempo valioso.</li>
-                            <li><strong>No Inicies sin Concentración:</strong> El juego de Calibración (Memoria) es fundamental. Inícialo solo cuando estés listo, ya que usa el tiempo más largo (60s).</li>
-                        </ul>
-                    </div>
-
-                </div>
-                <button class="btn submit-btn" id="start-game-btn" style="margin-top: 40px;">¡Comenzar Odisea Ahora!</button>
+            <div class="hero-content">
+                <h1>Un Viaje a Través del Humanismo y la Ciudadanía Digital</h1>
+                <p>Pon a prueba tu conocimiento, compite por el primer lugar y comparte tus ideas en nuestra comunidad.</p>
+                <a href="#game" id="start-adventure-btn" class="btn btn-primary">Comenzar el Desafío</a>
             </div>
         </section>
 
-        <section id="game-section" class="container">
-            <div class="hud">
-                <div class="score">Puntuación: <span id="score">0</span></div>
-                <div class="digital-compass">Era Actual: <span id="current-era">Inicializando...</span></div>
-                <div class="chrono-meter">Tiempo: <span id="time-remaining">--</span></div>
-                <button class="btn time-travel-btn" id="time-travel-btn" disabled>Viajar a Siguiente Era ➡️</button>
-                <button class="btn" id="restart-mission-btn" style="display: none;">Reiniciar Misión</button>
-            </div>
-            
-            <div class="timeline-container">
-                <span class="era-marker marker-0" data-index="0" title="Calibración"></span>
-                <div class="timeline-era era-0" data-index="0"></div>
-                <span class="era-marker marker-1" data-index="1" title="Presente"></span>
-                <div class="timeline-era era-1" data-index="1"></div>
-                <span class="era-marker marker-2" data-index="2" title="Silenciosa"></span>
-                <div class="timeline-era era-2" data-index="2"></div>
-                <span class="era-marker marker-3" data-index="3" title="Boomers"></span>
-                <div class="timeline-era era-3" data-index="3"></div>
-                <span class="era-marker marker-4" data-index="4" title="Gen X"></span>
-                <div class="timeline-era era-4" data-index="4"></div>
-                <span class="era-marker marker-5" data-index="5" title="Millennials"></span>
-                <div class="timeline-era era-5" data-index="5"></div>
-                <span class="era-marker marker-6" data-index="6" title="Gen Z"></span>
-                <div class="timeline-era era-6" data-index="6"></div>
-                <span class="era-marker marker-7" data-index="7" title="Alpha"></span>
-            </div>
-
-            <div id="scenes" style="width: 100%;">
-                
-                <div class="scene active" data-scene="0">
-                    <h2 class="scene-title">Calibración Temporal: Módulo de Memoria</h2>
-                    <p class="scene-desc">Tienes 60 segundos para activar tu memoria tecnológica encontrando los 4 pares de íconos. ¡Precisión y velocidad!</p>
-                    <div class="mini-game">
-                        <div id="memory-grid">
-                        </div>
-                        <p id="memory-status" style="font-weight: bold; margin-top: 15px;"></p>
-                        <button class="btn submit-btn" id="start-memory-btn">Iniciar Juego de Memoria</button>
-                        <div class="feedback" id="feedback-0"></div>
-                        <div class="educational-content" id="educational-0" style="display: none;">
-                            <p class="edu-feedback"></p>
-                            <p class="did-you-know"></p>
-                        </div>
-                    </div>
+        <section id="game" style="display: none;">
+            <h2 class="section-title">Juego de las Generaciones</h2>
+            <div id="game-container">
+                <p id="question" class="game-question"></p>
+                <div id="options" class="game-options"></div>
+                <p id="feedback" class="game-feedback"></p>
+                <div class="game-hud">
+                    <p>Puntuación: <span id="score">0</span></p>
+                    <button id="next-btn" class="btn">Siguiente</button>
                 </div>
-
-                <div class="scene" data-scene="1">
-                    <h2 class="scene-title">Presente: Era Digital (Gen Alpha/Z)</h2>
-                    <p class="scene-desc">Tienes 30 segundos para teclear el siguiente mensaje con exactitud. ¡Demuestra que dominas la inmediatez!</p>
-                    <div class="mini-game">
-                        <div class="typing-challenge">
-                            <p class="challenge-phrase-label">Teclea esto:</p>
-                            <div id="typing-challenge-phrase" class="challenge-phrase"></div>
-                        </div>
-                        <input type="text" class="message-input" placeholder="Comienza a escribir aquí..." id="modern-msg">
-                        <button class="btn submit-btn" id="send-modern-msg-btn">Verificar Mensaje 📲</button>
-                        <div class="feedback" id="feedback-1"></div>
-                        <div class="educational-content" id="educational-1" style="display: none;">
-                            <p class="edu-feedback"></p>
-                            <p class="did-you-know"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="2">
-                    <h2 class="scene-title">Generación Silenciosa: La Era de la Radio</h2>
-                    <p class="scene-desc">Sintoniza las noticias y el entretenimiento como lo hacían antes. Selecciona las 4 opciones correctas que representan eventos o programas de esa era.</p>
-                    <div class="mini-game puzzle-game" id="radio-puzzle">
-                        <div class="puzzle-piece" data-correct="true">Noticias de la Guerra</div>
-                        <div class="puzzle-piece" data-correct="false">Podcasts de Comedia</div>
-                        <div class="puzzle-piece" data-correct="true">Radionovelas</div>
-                        <div class="puzzle-piece" data-correct="true">Música Big Band</div>
-                        <div class="puzzle-piece" data-correct="false">Estrenos de Películas en Streaming</div>
-                        <div class="puzzle-piece" data-correct="true">Discursos Presidenciales</div>
-                    </div>
-                    <button class="btn submit-btn" id="check-radio-puzzle-btn">Sintonizar Frecuencia</button>
-                    <div class="feedback" id="feedback-2"></div>
-                    <div class="educational-content" id="educational-2" style="display: none;">
-                        <p class="edu-feedback"></p>
-                        <p class="did-you-know"></p>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="3">
-                    <h2 class="scene-title">Baby Boomers: La Revolución de la TV</h2>
-                    <p class="scene-desc">La televisión se convirtió en el centro del hogar. Elige los 4 programas o eventos que marcaron a esta generación.</p>
-                    <div class="mini-game puzzle-game" id="tv-puzzle">
-                        <div class="puzzle-piece" data-correct="true">Llegada a la Luna</div>
-                        <div class="puzzle-piece" data-correct="false">Series de Netflix</div>
-                        <div class="puzzle-piece" data-correct="true">El Show de Ed Sullivan</div>
-                        <div class="puzzle-piece" data-correct="true">Bonanza</div>
-                        <div class="puzzle-piece" data-correct="true">I Love Lucy</div>
-                        <div class="puzzle-piece" data-correct="false">Videos Virales de YouTube</div>
-                    </div>
-                    <button class="btn submit-btn" id="check-tv-puzzle-btn">Ajustar Antena</button>
-                    <div class="feedback" id="feedback-3"></div>
-                    <div class="educational-content" id="educational-3" style="display: none;">
-                        <p class="edu-feedback"></p>
-                        <p class="did-you-know"></p>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="4">
-                    <h2 class="scene-title">Generación X: El Amanecer del PC</h2>
-                    <p class="scene-desc">En la era de la computación personal, la simplicidad era poder. Escribe el comando para iniciar el programa.</p>
-                    <div class="mini-game">
-                        <div class="code-prompt">C:\></div>
-                        <input type="text" class="message-input" placeholder="Escribe tu comando..." id="code-input">
-                        <button class="btn submit-btn" id="run-code-btn">Ejecutar Programa</button>
-                        <div class="feedback" id="feedback-4"></div>
-                        <div class="educational-content" id="educational-4" style="display: none;">
-                            <p class="edu-feedback"></p>
-                            <p class="did-you-know"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="5">
-                    <h2 class="scene-title">Millennials: El Nacimiento de las Redes</h2>
-                    <p class="scene-desc">Fuiste pionero en la conexión digital. Elige 4 elementos clave para lanzar la primera red social exitosa.</p>
-                    <div class="mini-game puzzle-game" id="social-puzzle">
-                        <div class="puzzle-piece" data-correct="true">Perfiles de Usuario</div>
-                        <div class="puzzle-piece" data-correct="true">Solicitudes de Amistad</div>
-                        <div class="puzzle-piece" data-correct="false">Filtros de Realidad Aumentada</div>
-                        <div class="puzzle-piece" data-correct="true">Muro para Publicaciones</div>
-                        <div class="puzzle-piece" data-correct="true">Mensajería Instantánea</div>
-                        <div class="puzzle-piece" data-correct="false">Historias que desaparecen</div>
-                    </div>
-                    <button class="btn submit-btn" id="build-network-btn">Construir Red</button>
-                    <div class="feedback" id="feedback-5"></div>
-                    <div class="educational-content" id="educational-5" style="display: none;">
-                        <p class="edu-feedback"></p>
-                        <p class="did-you-know"></p>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="6">
-                    <h2 class="scene-title">Generación Z: La Era del Contenido Viral</h2>
-                    <p class="scene-desc">La atención es el recurso más valioso. Elige 4 ingredientes para crear un video corto que se vuelva viral.</p>
-                    <div class="mini-game puzzle-game" id="tiktok-puzzle">
-                        <div class="puzzle-piece" data-correct="true">Música en Tendencia</div>
-                        <div class="puzzle-piece" data-correct="true">Un Reto o Baile</div>
-                        <div class="puzzle-piece" data-correct="false">Un Documental de 20 Minutos</div>
-                        <div class="puzzle-piece" data-correct="true">Edición Rápida y Dinámica</div>
-                        <div class="puzzle-piece" data-correct="true">Humor Relacionable</div>
-                        <div class="puzzle-piece" data-correct="false">Un Enlace a un Artículo</div>
-                    </div>
-                    <button class="btn submit-btn" id="create-tiktok-btn">¡Publicar Video!</button>
-                    <div class="feedback" id="feedback-6"></div>
-                    <div class="educational-content" id="educational-6" style="display: none;">
-                        <p class="edu-feedback"></p>
-                        <p class="did-you-know"></p>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="7">
-                    <h2 class="scene-title">Generación Alpha: La IA como Compañera</h2>
-                    <p class="scene-desc">La IA es tu asistente personal. Formula una pregunta de más de 10 caracteres para demostrar que sabes cómo interactuar con ella.</p>
-                    <div class="mini-game">
-                        <input type="text" class="message-input" placeholder="Escribe una pregunta para la IA..." id="ai-input">
-                        <button class="btn submit-btn" id="ask-ai-btn">Consultar a la IA</button>
-                        <div class="feedback" id="feedback-7"></div>
-                        <div class="educational-content" id="educational-7" style="display: none;">
-                            <p class="edu-feedback"></p>
-                            <p class="did-you-know"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="scene" data-scene="8">
-                    <h2 class="scene-title">Construyendo Puentes Entre Generaciones</h2>
-                    <p class="scene-desc">Has viajado en el tiempo y has visto cómo ha evolucionado la comunicación. Ahora, demuestra tu sabiduría conectando las ideas a través de las eras.</p>
-                    
-                    <div class="mini-game final-quiz">
-                        <div class="quiz-question">
-                            <p><strong>Pregunta 1:</strong> ¿Qué tecnología, popularizada por la <strong>Generación X</strong>, fue la precursora directa de las redes sociales de los <strong>Millennials</strong>?</p>
-                            <select id="q1-answer">
-                                <option value="incorrecto">La Televisión por Cable</option>
-                                <option value="correcto">Los Foros y Chats (BBS)</option>
-                                <option value="incorrecto">El Walkman</option>
-                            </select>
-                        </div>
-
-                        <div class="quiz-question">
-                            <p><strong>Pregunta 2:</strong> La comunicación visual y rápida de la <strong>Generación Z</strong> (TikTok, Instagram) es una evolución de los mensajes de texto (SMS) y los blogs de los <strong>Millennials</strong>, pero ¿qué la diferencia fundamentalmente?</p>
-                            <select id="q2-answer">
-                                <option value="correcto">El predominio del video corto y el algoritmo</option>
-                                <option value="incorrecto">El uso de texto más largo y detallado</option>
-                                <option value="incorrecto">La exclusividad para computadoras de escritorio</option>
-                            </select>
-                        </div>
-
-                        <button class="btn submit-btn" id="check-final-quiz-btn">Verificar Sabiduría</button>
-                        <div class="feedback" id="feedback-8"></div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-        
-        <section id="leaderboard-section">
-            <div class="container">
-                <h2>🏆 Salón de la Fama de Chronotech</h2>
-                <p class="scene-desc">Los mejores viajeros del tiempo que han completado la Odisea.</p>
-                
-                <div id="leaderboard-loading">
-                    <div class="spinner"></div>
-                    <p>Cargando el Salón de la Fama...</p>
-                </div>
-
-                <ol id="leaderboard-list"></ol>
-
-                <p id="no-scores-message" style="display: none;">Aún no hay puntuaciones. ¡Sé el primero en dejar tu marca!</p>
             </div>
         </section>
 
-        <section id="comments-section">
-            <div class="comments-container">
-                <h2>Muro de la Odisea: Comentarios</h2>
-                
-                <form id="comment-form">
-                    <div class="form-group">
-                        <label for="comment-name">Nombre de Viajero</label>
-                        <input type="text" id="comment-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="comment-text">Escribe tu comentario</label>
-                        <textarea id="comment-text" required></textarea>
-                        <div id="char-counter" class="char-counter">1000 caracteres restantes</div>
-                    </div>
-                    <button type="submit" class="btn">Enviar Comentario</button>
-                </form>
-                
-                <div id="comments-loading">
-                    <div class="spinner"></div>
-                    <p>Cargando comentarios...</p>
-                </div>
-                <ul id="comments-list"></ul>
-                <p id="no-comments-message" style="display: none;">Sé el primero en dejar un comentario en el Muro de la Odisea.</p>
-
-            </div>
+        <section id="leaderboard-section" style="display: none;">
+            <h2 class="section-title">Salón de Honor</h2>
+            <div id="leaderboard-loading" class="loading-spinner">Cargando...</div>
+            <ol id="leaderboard-list"></ol>
         </section>
 
-        <footer>
-            <p>&copy; 2025 Chronotech Odyssey - Todos los derechos reservados.</p>
-            <p class="footer-credits">Desarrollado y Fundado por Albert Daniel Gaviria.</p>
-        </footer>
-    </div>
+        <section id="comments-section" style="display: none;">
+            <h2 class="section-title">Foro de la Comunidad</h2>
+            <div id="comment-form-container">
+                <div id="comment-form">
+                    <textarea id="comment-input" placeholder="Comparte tus reflexiones aquí..."></textarea>
+                    <button id="submit-comment" class="btn">Enviar Comentario</button>
+                </div>
+            </div>
+            <div id="comments-loading" class="loading-spinner">Cargando...</div>
+            <div id="comments-container"></div>
+        </section>
 
-    <script src="script.js" type="module"></script>
-    <script src="comments.js" type="module"></script>
-    <script src="leaderboard.js" type="module"></script>
-    <script src="auth.js" type="module"></script>
-    <script src="animations.js" defer></script>
+        <section id="profile-section" style="display: none;">
+            <h2 class="section-title">Perfil de Agente</h2>
+            <div id="profile-container">
+                <!-- El contenido del perfil se cargará aquí -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Albert Daniel Gaviria Zapata - Una Actividad de Aprendizaje para Humanismo y Ciudadanía Digital.</p>
+    </footer>
+
+    <!-- Scripts de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+
+    <!-- Main App Entry Point -->
+    <script type="module" src="app.js"></script>
+
 </body>
 </html>
