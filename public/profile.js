@@ -13,6 +13,50 @@ function showSection(sectionId) {
     });
 }
 
+async function renderProgressChart() {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const scoreHistoryRef = db.collection('users').doc(user.uid).collection('scoreHistory').orderBy('timestamp', 'asc');
+    const snapshot = await scoreHistoryRef.get();
+
+    if (snapshot.empty) {
+        return; // No history to show
+    }
+
+    const labels = [];
+    const data = [];
+
+    snapshot.forEach(doc => {
+        const record = doc.data();
+        labels.push(record.timestamp.toDate().toLocaleDateString());
+        data.push(record.score);
+    });
+
+    const ctx = document.getElementById('progress-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Puntuación a lo largo del tiempo',
+                data: data,
+                borderColor: 'var(--accent-neon-cyan)',
+                backgroundColor: 'rgba(0, 255, 255, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
 // Fetches and renders the user's profile data
 async function loadProfileData() {
     const user = getCurrentUser();
@@ -41,9 +85,18 @@ async function loadProfileData() {
                             <span class="stat-value">${data.score || 0}</span>
                         </div>
                     </div>
+                    <div class="chart-container" style="margin-top: 2rem;">
+                        <canvas id="progress-chart"></canvas>
+                    </div>
                     <p class="profile-member-since">Miembro desde: ${data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A'}</p>
+                    <button id="close-profile-btn" class="btn btn-primary" style="margin-top: 1.5rem;">Cerrar</button>
                 </div>
             `;
+            document.getElementById('close-profile-btn').addEventListener('click', () => {
+                window.location.reload();
+            });
+
+            renderProgressChart(); // Call the new function
         } else {
             profileContainer.innerHTML = '<p>No se encontró el perfil de usuario.</p>';
         }

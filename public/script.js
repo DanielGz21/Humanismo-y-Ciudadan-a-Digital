@@ -5,25 +5,21 @@ import { getCurrentUser } from './auth.js';
 let score = 0;
 let currentQuestionIndex = 0;
 let questions = [];
+let timerInterval;
+const TIME_LIMIT = 15;
+let remainingAttempts;
 
 // The main initialization function for the game logic
 export function initGame(user) {
-    const startButton = document.getElementById('start-adventure-btn');
     const nextBtn = document.getElementById('next-btn');
-
     if (user) {
-        startButton.textContent = "Comenzar Aventura";
-        startButton.disabled = false;
         nextBtn.addEventListener('click', handleNextClick);
-        startButton.addEventListener('click', startGame, { once: true });
-    } else {
-        startButton.textContent = "Inicia Sesión para Jugar";
-        startButton.disabled = true;
     }
+    // The startButton from the hero section is no longer used to start the game.
 }
 
-async function startGame() {
-    await fetchQuestions();
+export async function startGame(quizId) {
+    await fetchQuestions(quizId);
     
     const user = getCurrentUser();
     if (!user) return;
@@ -31,30 +27,28 @@ async function startGame() {
     const userRef = db.collection('users').doc(user.uid);
     const doc = await userRef.get();
 
-    if (doc.exists && doc.data().currentQuestionIndex > 0 && doc.data().currentQuestionIndex < questions.length) {
-        currentQuestionIndex = doc.data().currentQuestionIndex;
+    if (doc.exists) {
         score = doc.data().score || 0;
-        showToast('Progreso restaurado.', 'info');
     } else {
-        currentQuestionIndex = 0;
         score = 0;
-        await userRef.set({ score: 0, currentQuestionIndex: 0 }, { merge: true });
     }
     
+    currentQuestionIndex = 0;
     document.getElementById('score').textContent = score;
     document.getElementById('hero').style.display = 'none';
+    document.getElementById('quiz-selection').style.display = 'none';
     document.getElementById('game').style.display = 'block';
     loadQuestion();
 }
 
-async function fetchQuestions() {
-    const questionsRef = db.collection('questions').doc('generations-quiz');
+async function fetchQuestions(quizId) {
+    const questionsRef = db.collection('quizzes').doc(quizId);
     try {
         const doc = await questionsRef.get();
         if (doc.exists) {
             questions = doc.data().questionSet.sort(() => Math.random() - 0.5);
         } else {
-            showToast("Error: No se encontraron las preguntas.", "error");
+            showToast("Error: No se encontraron las preguntas para este juego.", "error");
             questions = [];
         }
     } catch (error) {
@@ -70,9 +64,38 @@ function loadQuestion() {
         return;
     }
 
+    remainingAttempts = 3;
+    document.getElementById('attempts').textContent = remainingAttempts;
+
+    clearInterval(timerInterval);
+    let timeLeft = TIME_LIMIT;
+    const timerEl = document.getElementById('timer');
+    timerEl.textContent = timeLeft;
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            showToast("¡Tiempo agotado!", 'error');
+            document.querySelectorAll('#options .btn').forEach(btn => btn.disabled = true);
+            const correctAnswer = questions[currentQuestionIndex].answer;
+            const detailedFeedback = questions[currentQuestionIndex].feedback;
+            document.getElementById('feedback').textContent = `¡Tiempo agotado! La respuesta era: ${correctAnswer}`;
+            if (detailedFeedback) {
+                const feedbackEl = document.getElementById('detailed-feedback');
+                feedbackEl.textContent = detailedFeedback;
+                feedbackEl.style.display = 'block';
+            }
+            document.getElementById('next-btn').style.display = 'block';
+        }
+    }, 1000);
+
     const currentQuestion = questions[currentQuestionIndex];
     document.getElementById('question').textContent = currentQuestion.question;
     document.getElementById('feedback').textContent = '';
+    document.getElementById('detailed-feedback').textContent = '';
+    document.getElementById('detailed-feedback').style.display = 'none';
     document.getElementById('next-btn').style.display = 'none';
     
     const optionsEl = document.getElementById('options');
@@ -86,43 +109,100 @@ function loadQuestion() {
     });
 }
 
-function selectAnswer(selectedButton, selectedOption) {
-    const correctAnswser = questions[currentQuestionIndex].answer;
-    document.querySelectorAll('#options .btn').forEach(btn => btn.disabled = true);
-
-    if (selectedOption === correctAnswser) {
-        showToast('¡Correcto! +10 Puntos', 'success');
-        document.getElementById('feedback').textContent = "¡Correcto!";
-        selectedButton.style.borderColor = "var(--accent-neon-cyan)";
-        score += 10;
-        document.getElementById('score').textContent = score;
-    } else {
-        showToast('Respuesta incorrecta', 'error');
-        document.getElementById('feedback').textContent = `Incorrecto. La respuesta era: ${correctAnswser}`;
-        selectedButton.style.borderColor = "var(--accent-neon-magenta)";
-    }
-    
-    saveProgress(score, currentQuestionIndex + 1);
-    document.getElementById('next-btn').style.display = 'block';
+function getRank(score) {
+    if (score <= 50) return 'Novato';
+    if (score <= 100) return 'Aprendiz';
+    if (score <= 150) return 'Conocedor';
+    if (score <= 200) return 'Experto';
+    return 'Maestro';
 }
 
-function saveProgress(currentScore, nextQuestionIndex) {
+async function saveProgress(currentScore, nextQuestionIndex) {
     const user = getCurrentUser();
     if (user) {
         const userRef = db.collection('users').doc(user.uid);
-        userRef.update({ 
-            score: currentScore,
-            currentQuestionIndex: nextQuestionIndex
-        }).catch(error => console.error("Error al guardar el progreso: ", error));
+        try {
+            const doc = await userRef.get();
+            if(doc.exists) {
+                const currentRank = doc.data().rank || 'Novato';
+                const newRank = getRank(currentScore);
+                const dataToUpdate = {
+                    score: currentScore,
+                    currentQuestionIndex: nextQuestionIndex
+                };
+                if (newRank !== currentRank) {
+                    dataToUpdate.rank = newRank;
+                    showToast(`¡Has ascendido a ${newRank}!`, 'success');
+                }
+                
+                const batch = db.batch();
+                batch.update(userRef, dataToUpdate);
+
+                const scoreHistoryRef = userRef.collection('scoreHistory').doc();
+                batch.set(scoreHistoryRef, {
+                    score: currentScore,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await batch.commit();
+            }
+        } catch (error) {
+            console.error("Error al guardar el progreso: ", error);
+        }
+    }
+}
+
+function selectAnswer(selectedButton, selectedOption) {
+    const correctAnswer = questions[currentQuestionIndex].answer;
+    const detailedFeedback = questions[currentQuestionIndex].feedback;
+
+    if (selectedOption === correctAnswer) {
+        clearInterval(timerInterval);
+        showToast('¡Correcto! +10 Puntos', 'success');
+        document.getElementById('feedback').textContent = "¡Correcto!";
+        if (detailedFeedback) {
+            const feedbackEl = document.getElementById('detailed-feedback');
+            feedbackEl.textContent = detailedFeedback;
+            feedbackEl.style.display = 'block';
+        }
+        selectedButton.style.borderColor = "var(--accent-neon-cyan)";
+        score += 10;
+        document.getElementById('score').textContent = score;
+        document.querySelectorAll('#options .btn').forEach(btn => btn.disabled = true);
+        document.getElementById('next-btn').style.display = 'block';
+        saveProgress(score, currentQuestionIndex + 1);
+    } else {
+        remainingAttempts--;
+        document.getElementById('attempts').textContent = remainingAttempts;
+        selectedButton.disabled = true;
+        selectedButton.style.borderColor = "var(--accent-neon-magenta)";
+
+        if (remainingAttempts > 0) {
+            showToast(`Incorrecto. Te quedan ${remainingAttempts} intentos.`, 'error');
+        } else {
+            clearInterval(timerInterval);
+            showToast('No te quedan más intentos.', 'error');
+            document.getElementById('feedback').textContent = `La respuesta correcta era: ${correctAnswer}`;
+            if (detailedFeedback) {
+                const feedbackEl = document.getElementById('detailed-feedback');
+                feedbackEl.textContent = detailedFeedback;
+                feedbackEl.style.display = 'block';
+            }
+            document.querySelectorAll('#options .btn').forEach(btn => btn.disabled = true);
+            document.getElementById('next-btn').style.display = 'block';
+            saveProgress(score, currentQuestionIndex + 1);
+        }
     }
 }
 
 function handleNextClick() {
     currentQuestionIndex++;
+    saveProgress(score, currentQuestionIndex);
     loadQuestion();
 }
 
 function showFinalScore() {
+    clearInterval(timerInterval);
     showToast('¡Aventura Completada!', 'info');
     document.getElementById('game-container').innerHTML = `
         <h2 class="section-title">¡Aventura Completada!</h2>
@@ -130,5 +210,23 @@ function showFinalScore() {
         <button id="restart-btn" class="btn btn-primary" style="margin: 2rem auto; display: block;">Jugar de Nuevo</button>
     `;
     document.getElementById('restart-btn').addEventListener('click', () => window.location.reload());
-    saveProgress(score, 0);
+    
+    // Desbloquear y mostrar el Salón de Honor y el Foro
+    document.getElementById('leaderboard-section').style.display = 'block';
+    document.getElementById('comments-section').style.display = 'block';
+
+    saveProgress(score, 0); // Guardar el progreso final
 }
+
+const style = document.createElement('style');
+style.innerHTML = `
+    .detailed-feedback {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        color: var(--text-secondary-color);
+    }
+`;
+document.head.appendChild(style);

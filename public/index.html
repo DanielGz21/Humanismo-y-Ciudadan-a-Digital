@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -39,14 +40,24 @@
             </div>
         </section>
 
+        <section id="quiz-selection" style="display: none;">
+            <h2 class="section-title">Elige un Desafío</h2>
+            <div id="quiz-list-container">
+                <!-- Los quizzes se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+
         <section id="game" style="display: none;">
             <h2 class="section-title">Juego de las Generaciones</h2>
             <div id="game-container">
                 <p id="question" class="game-question"></p>
                 <div id="options" class="game-options"></div>
                 <p id="feedback" class="game-feedback"></p>
+                <p id="detailed-feedback" class="detailed-feedback" style="display: none;"></p>
                 <div class="game-hud">
                     <p>Puntuación: <span id="score">0</span></p>
+                    <p>Tiempo: <span id="timer">15</span></p>
+                    <p>Intentos: <span id="attempts">3</span></p>
                     <button id="next-btn" class="btn">Siguiente</button>
                 </div>
             </div>
@@ -61,10 +72,10 @@
         <section id="comments-section" style="display: none;">
             <h2 class="section-title">Foro de la Comunidad</h2>
             <div id="comment-form-container">
-                <div id="comment-form">
+                <form id="comment-form">
                     <textarea id="comment-input" placeholder="Comparte tus reflexiones aquí..."></textarea>
-                    <button id="submit-comment" class="btn">Enviar Comentario</button>
-                </div>
+                    <button id="submit-comment" class="btn" type="submit">Enviar Comentario</button>
+                </form>
             </div>
             <div id="comments-loading" class="loading-spinner">Cargando...</div>
             <div id="comments-container"></div>
@@ -79,7 +90,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Albert Daniel Gaviria Zapata - Una Actividad de Aprendizaje para Humanismo y Ciudadanía Digital.</p>
+        <p>&copy; 2025 Albert Daniel Gaviria Zapata - Humanismo y Ciudadanía Digital.</p>
     </footer>
 
     <!-- Scripts de Firebase -->

@@ -38,7 +38,7 @@ function renderComment(doc) {
     li.className = 'comment';
     const isLiked = user && data.likes && data.likes[user.uid];
     
-    const photoURL = data.photoURL || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="%23${hashCode(data.uid || 'default')}"/><text x="50%" y="50%" style="fill:%23fff;font-size:20px;font-family:sans-serif;text-anchor:middle;dominant-baseline:central">${escapeHTML(data.name[0] || '?')}</text></svg>`;
+    const photoURL = data.photoURL || `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#${hashCode(data.uid || 'default')}"/><text x="50%" y="50%" style="fill:#fff;font-size:20px;font-family:sans-serif;text-anchor:middle;dominant-baseline:central">${escapeHTML(data.name[0] || '?')}</text></svg>`)}`;
 
     li.innerHTML = `
         <img src="${photoURL}" alt="${escapeHTML(data.name)}" class="comment-avatar">
@@ -59,7 +59,8 @@ function renderComment(doc) {
     li.querySelector('.reply-btn').addEventListener('click', (e) => toggleReplyForm(e, doc.id));
     const deleteBtn = li.querySelector('.delete-btn');
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => handleDelete(doc.id));
+        deleteBtn.dataset.commentId = doc.id;
+        deleteBtn.addEventListener('click', handleDeleteClick);
     }
 
     const repliesListEl = li.querySelector('.replies-list');
@@ -80,7 +81,7 @@ function renderReply(doc, parentId) {
     const isAdmin = isCurrentUserAdmin();
     const li = document.createElement('div');
     li.className = 'comment reply';
-    const photoURL = data.photoURL || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="15" fill="%23${hashCode(data.uid || 'default')}"/><text x="50%" y="50%" style="fill:%23fff;font-size:15px;font-family:sans-serif;text-anchor:middle;dominant-baseline:central">${escapeHTML(data.name[0] || '?')}</text></svg>`;
+    const photoURL = data.photoURL || `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="15" fill="#${hashCode(data.uid || 'default')}"/><text x="50%" y="50%" style="fill:#fff;font-size:15px;font-family:sans-serif;text-anchor:middle;dominant-baseline:central">${escapeHTML(data.name[0] || '?')}</text></svg>`)}`;
 
     li.innerHTML = `
         <img src="${photoURL}" alt="${escapeHTML(data.name)}" class="comment-avatar small">
@@ -93,7 +94,9 @@ function renderReply(doc, parentId) {
 
     const deleteBtn = li.querySelector('.delete-reply-btn');
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => handleDelete(parentId, doc.id));
+        deleteBtn.dataset.parentId = parentId;
+        deleteBtn.dataset.replyId = doc.id;
+        deleteBtn.addEventListener('click', handleDeleteClick);
     }
     return li;
 }
@@ -154,12 +157,34 @@ function handleLike(commentId) {
     }).catch(err => { console.error(err); showToast('No se pudo procesar el like.', 'error'); });
 }
 
-function handleDelete(commentId, replyId = null) {
-    const docRef = replyId ? db.collection('comments').doc(commentId).collection('replies').doc(replyId) : db.collection('comments').doc(commentId);
-    if (!confirm("¿Estás seguro?")) return;
-    docRef.delete()
-        .then(() => showToast('Eliminado correctamente.', 'info'))
-        .catch(err => { console.error(err); showToast('No se pudo eliminar.', 'error'); });
+// New delete handler that prevents browser blocking
+function handleDeleteClick(event) {
+    const button = event.target;
+    const { commentId, parentId, replyId } = button.dataset;
+
+    if (button.dataset.confirmed === 'true') {
+        const docRef = replyId 
+            ? db.collection('comments').doc(parentId).collection('replies').doc(replyId) 
+            : db.collection('comments').doc(commentId);
+
+        docRef.delete()
+            .then(() => showToast('Eliminado correctamente.', 'info'))
+            .catch(err => { console.error(err); showToast('No se pudo eliminar.', 'error'); });
+    } else {
+        // First click, ask for confirmation
+        button.textContent = 'Confirmar Borrado';
+        button.style.color = 'var(--accent-neon-magenta)';
+        button.dataset.confirmed = 'true';
+
+        // Set a timeout to revert the button
+        setTimeout(() => {
+            if (document.body.contains(button)) {
+                button.textContent = 'Eliminar';
+                button.style.color = '';
+                delete button.dataset.confirmed;
+            }
+        }, 3000);
+    }
 }
 
 function escapeHTML(str = '') {

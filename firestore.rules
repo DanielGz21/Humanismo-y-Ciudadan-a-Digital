@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users: Allow reading profiles. Users can only write to their own doc.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      // Allow write access if the user is the owner of the document.
+      // This covers creating and updating their score/progress.
+      allow write: if request.auth != null && request.auth.uid == userId;
+
+      // Allow users to read and write to their own score history sub-collection.
+      match /scoreHistory/{historyId} {
+        allow read, create: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Quizzes: Allow authenticated users to read.
+    match /quizzes/{quizId} {
+      allow read: if request.auth != null;
+      allow write: if false; // No client-side writes
+    }
+
+    // Comments: Allow authenticated users to read/create.
+    // Users can only update/delete their own comments, or if they are an admin.
+    match /comments/{commentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      // Allow update/delete if user is author OR user is in the admin list.
+      allow update, delete: if request.auth != null && (resource.data.uid == request.auth.uid || request.auth.uid in ['D4QP7hTeRERO4ZLC6DD532fyIfY2']);
+
+      // Replies to comments
+      match /replies/{replyId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+        // Allow update/delete if user is author OR user is in the admin list.
+        allow update, delete: if request.auth != null && (resource.data.uid == request.auth.uid || request.auth.uid in ['D4QP7hTeRERO4ZLC6DD532fyIfY2']);
+      }
+    }
+  }
+}
