@@ -30,12 +30,18 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     const questionsDoc = await db.collection("questions")
         .doc("generations-quiz").get();
     if (!questionsDoc.exists) {
-      throw new functions.https.HttpsError("not-found", "Question set not found.");
+      throw new functions.https.HttpsError(
+          "not-found",
+          "Question set not found.",
+      );
     }
 
     const questions = questionsDoc.data().questionSet;
     if (questionIndex >= questions.length) {
-      throw new functions.https.HttpsError("out-of-range", "Question index is out of range.");
+      throw new functions.https.HttpsError(
+          "out-of-range",
+          "Question index is out of range.",
+      );
     }
 
     const correctAnswer = questions[questionIndex].answer;
@@ -53,7 +59,10 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
       await userRef.update({
         currentQuestionIndex: questionIndex + 1,
       });
-      return {success: false, message: `Incorrecto. La respuesta era: ${correctAnswer}`};
+      return {
+        success: false,
+        message: `Incorrecto. La respuesta era: ${correctAnswer}`,
+      };
     }
   } catch (error) {
     console.error("Error in submitAnswer Cloud Function:", error);

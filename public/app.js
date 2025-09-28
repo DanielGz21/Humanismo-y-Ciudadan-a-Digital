@@ -1,3 +1,4 @@
+import { initUI } from './ui.js';
 import { auth } from './firebase-config.js';
 import { initGame } from './script.js';
 import { initQuizSelection } from './quiz-selection.js';
@@ -8,6 +9,7 @@ import { initAuth } from './auth.js';
 // This is the main entry point of the application.
 
 document.addEventListener('DOMContentLoaded', () => {
+    initUI();
     console.log("App cargada. Esperando estado de autenticación...");
 
     // Initialize authentication logic first.
