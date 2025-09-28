@@ -1,0 +1,585 @@
+
+        /* --- Paleta de Colores y Variables (Minimalista) --- */
+        :root {
+            --primary: #4a90e2; /* Azul profesional */
+            --secondary: #63d471; /* Verde sutil */
+            --accent: #e27d60; /* Coral suave, para urgencia/alerta */
+            --bg-dark: #1e293b; /* Azul oscuro elegante */
+            --bg-medium: #334155;
+            --text-light: #e2e8f0; /* Gris claro para texto */
+            --card-bg: rgba(255, 255, 255, 0.08); /* Fondo de tarjeta transparente */
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --transition: all 0.4s ease;
+            --dev-color: #ffc300; /* Color para personalización */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        /* --- Particle/Star Field Background --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 1px, var(--bg-dark) 1px),
+                        radial-gradient(circle, transparent 1px, var(--bg-dark) 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            z-index: -1;
+            animation: move-stars 120s linear infinite;
+        }
+
+        @keyframes move-stars {
+            from { background-position: 0 0; }
+            to { background-position: 50px 50px; }
+        }
+
+        /* --- Header for Personalization --- */
+        header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--dev-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 195, 0, 0.2);
+        }
+
+        /* --- Global Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        section {
+            padding: 80px 20px;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* --- Hero Section (Welcome) --- */
+        #hero {
+            padding-top: 150px;
+            background: linear-gradient(135deg, var(--bg-dark), #101721);
+            position: relative;
+        }
+
+        .title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5em, 5vw, 4.5em);
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        .subtitle {
+            font-size: clamp(1em, 2vw, 1.4em);
+            margin-bottom: 40px;
+            max-width: 800px;
+            opacity: 0.8;
+            animation: fadeIn 1.5s 0.2s forwards;
+            opacity: 0;
+        }
+        
+        /* --- Button Styling --- */
+        .btn {
+            background: var(--primary);
+            border: none;
+            padding: 14px 35px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 20px rgba(74, 144, 226, 0.4);
+            text-transform: uppercase;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #5a9ceb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.6);
+        }
+
+        .btn:disabled {
+            background: var(--bg-medium);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+        
+        /* --- Tutorial Section --- */
+        #tutorial {
+            background: var(--bg-medium);
+            padding: 40px 20px;
+        }
+        #tutorial h2 {
+            color: var(--dev-color);
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 30px;
+        }
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            text-align: left;
+        }
+        .guide-card {
+            background: var(--bg-dark);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--secondary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .guide-card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* --- Game Container & HUD --- */
+        #game-section {
+            display: none;
+            background: var(--bg-medium);
+        }
+
+        #game-section.active { display: flex; }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px; /* Reduced margin to fit timeline */
+            backdrop-filter: blur(5px);
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .score { font-size: 1.4em; font-weight: 600; color: var(--secondary); }
+        .digital-compass { 
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2em; 
+            color: var(--primary);
+            flex-grow: 0;
+        }
+        
+        /* Chrono Meter */
+        .chrono-meter {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4em;
+            color: var(--accent);
+            text-shadow: 0 0 5px rgba(226, 125, 96, 0.8);
+            margin: 0 20px;
+            flex-grow: 1;
+            text-align: center;
+            transition: color 0.5s;
+        }
+        
+        /* --- TIMELINE (Mini-Map) --- */
+        .timeline-container {
+            width: 100%;
+            padding: 10px 0;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        .timeline-era {
+            flex-grow: 1;
+            height: 4px;
+            background: var(--bg-medium);
+            margin: 0 5px;
+            position: relative;
+            transition: background 0.5s;
+        }
+        .timeline-era.completed {
+            background: var(--secondary);
+        }
+        .era-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-medium);
+            border: 2px solid var(--primary);
+            transition: all 0.5s;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .era-marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+        .era-marker.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        .era-marker.completed {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+        .era-marker:last-child {
+            right: 0;
+            transform: translate(50%, -50%);
+        }
+
+        .time-travel-btn {
+            background: var(--accent);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+
+        /* --- Scene Styling (Unchanged) --- */
+        .scene {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            min-height: 400px;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .scene.active { display: flex; }
+
+        .scene-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2em;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+        }
+
+        .scene-desc {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 700px;
+        }
+
+        /* --- Mini-Game Elements (Memory & Puzzle - Unchanged) --- */
+        .mini-game {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        #memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+            perspective: 1000px; 
+        }
+
+        .memory-card {
+            background: var(--bg-medium);
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 2em;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .card-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 80px;
+            backface-visibility: hidden;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .memory-card { height: 60px; }
+            .card-content { line-height: 60px; }
+        }
+
+
+        .card-front {
+            background: var(--primary);
+            color: var(--text-light);
+            transform: rotateY(180deg);
+        }
+
+        .card-back {
+            background: var(--bg-medium);
+            color: var(--text-light);
+            transform: rotateY(0deg);
+            font-size: 1.5em;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched {
+            transform: rotateY(180deg);
+            box-shadow: 0 0 15px var(--secondary);
+            cursor: default;
+        }
+        
+        /* --- General Mini-Game Styles (Unchanged) --- */
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 10px;
+        }
+
+        /* --- Footer (Unchanged) --- */
+        footer {
+            background: #101721;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 50px;
+            border-top: 1px solid var(--bg-medium);
+        }
+        .footer-credits {
+            color: var(--dev-color);
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+
+        /* --- Keyframes (Unchanged) --- */
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes urgentFlash {
+            0%, 100% { color: var(--accent); }
+            50% { color: yellow; }
+        }
+
+        /* --- Responsive Design (Refined) --- */
+        @media (max-width: 768px) {
+            section { padding: 50px 10px; }
+            .title { font-size: 2.8em; }
+            .subtitle { font-size: 1.1em; }
+            
+            /* HUD Responsiveness */
+            .hud { flex-direction: column; gap: 10px; padding: 15px; }
+            .digital-compass { order: -1; margin-bottom: 10px; }
+            .chrono-meter { order: 0; margin: 10px 0; width: 100%; }
+            .score { order: 1; }
+            .time-travel-btn { width: 100%; order: 3; }
+            
+            /* Timeline Responsiveness */
+            .timeline-container { flex-wrap: wrap; justify-content: space-around; }
+            .timeline-era { flex-basis: 100%; height: 20px; margin: 5px 0; }
+            .era-marker { position: static; transform: none; margin: 5px; }
+            .era-marker:last-child { transform: none; }
+
+            .guide-card { border-left: none; border-bottom: 5px solid var(--secondary); }
+            .bridge { flex-direction: column; }
+            .bridge-line { width: 4px; height: 30px; margin: 10px 0; }
+            .puzzle-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+            #memory-grid { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
+        }
+
+        /* --- Comments Section --- */
+        #comments-section {
+            background: var(--bg-medium);
+            padding: 60px 20px;
+            text-align: left;
+        }
+
+        #comments-section h2 {
+            font-family: 'Orbitron', monospace;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .comments-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* --- Comment Form --- */
+        #comment-form {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        #comment-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        #comment-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        #comment-form input,
+        #comment-form textarea {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 1px solid var(--bg-medium);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+        }
+
+        #comment-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.85em;
+            color: var(--text-light);
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        #comment-form .btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* --- Comments List --- */
+        #comments-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comment-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .comment-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--bg-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex-grow: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .comment-author {
+            font-weight: 800;
+            color: var(--secondary);
+        }
+
+        .comment-timestamp {
+            font-size: 0.8em;
+            color: var(--text-light);
+            opacity: 0.6;
+        }
+
+        .comment-text {
+            line-height: 1.7;
+            white-space: pre-wrap; /* Respects line breaks */
+        }
+
+        /* --- Loading and Empty State --- */
+        #comments-loading,
+        #no-comments-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1em;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        /* Simple spinner animation */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--bg-medium);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
