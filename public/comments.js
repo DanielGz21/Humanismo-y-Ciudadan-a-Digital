@@ -1,6 +1,7 @@
 import { db } from './firebase-config.js';
 import { getCurrentUser, isCurrentUserAdmin } from "./auth.js";
 import { showToast } from './notifications.js';
+import { checkAchievements } from './achievements.js';
 
 // La función principal para inicializar el módulo de comentarios
 export function initComments(user) {
@@ -60,7 +61,7 @@ async function renderComment(doc) {
         </div>
     `;
 
-    li.querySelector('.like-btn').addEventListener('click', () => handleLike(doc.id));
+        li.querySelector('.like-btn').addEventListener('click', () => handleLike(parentId, doc.id));
     li.querySelector('.reply-btn').addEventListener('click', (e) => toggleReplyForm(e, doc.id));
     const deleteBtn = li.querySelector('.delete-btn');
     if (deleteBtn) {
@@ -88,12 +89,19 @@ async function renderReply(doc, parentId) {
     li.className = 'comment reply';
     const photoURL = data.photoURL || `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="15" fill="#${hashCode(data.uid || 'default')}"/><text x="50%" y="50%" style="fill:#fff;font-size:15px;font-family:sans-serif;text-anchor:middle;dominant-baseline:central">${escapeHTML(data.name[0] || '?')}</text></svg>`)}`;
 
+    const isLiked = user && data.likes && data.likes[user.uid];
     li.innerHTML = `
         <img src="${photoURL}" alt="${escapeHTML(data.name)}" class="comment-avatar small">
         <div class="comment-body">
             <p class="comment-author">${escapeHTML(data.name)}</p>
             <p>${escapeHTML(data.text)}</p>
-            ${(user && user.uid === data.uid) || isAdmin ? `<div class="comment-actions"><button class="delete-reply-btn" data-parent-id="${parentId}" data-reply-id="${doc.id}">Eliminar</button></div>` : ''}
+            <div class="comment-actions">
+                <button class="like-btn ${isLiked ? 'active' : ''}">❤️ ${data.likeCount || 0}</button>
+                <button class="reply-btn">Responder</button>
+                ${(user && user.uid === data.uid) || isAdmin ? `<button class="delete-reply-btn" data-parent-id="${parentId}" data-reply-id="${doc.id}">Eliminar</button>` : ''}
+            </div>
+            <div class="reply-form-container"></div>
+            <div class="replies-list"></div>
         </div>
     `;
 
@@ -117,7 +125,15 @@ async function handleCommentSubmit(e) {
         await db.collection('comments').add({ name: user.displayName, text, uid: user.uid, photoURL: user.photoURL, timestamp: firebase.firestore.FieldValue.serverTimestamp(), likes: {}, likeCount: 0 });
         textarea.value = '';
         showToast('Comentario publicado', 'success');
-        await checkForumAchievements(user.uid);
+
+        // Incrementar el contador de comentarios del usuario
+        const userRef = db.collection('users').doc(user.uid);
+        await userRef.update({
+            commentCount: firebase.firestore.FieldValue.increment(1)
+        });
+
+        // Verificar logros después de actualizar el contador de comentarios
+        await checkAchievements(user, db);
     } catch (error) { console.error("Error: ", error); showToast('No se pudo publicar', 'error');
     } finally { submitBtn.disabled = false; }
 }
@@ -149,16 +165,36 @@ async function handleReplySubmit(e, parentId) {
     } catch (error) { console.error("Error: ", error); showToast('No se pudo responder', 'error'); }
 }
 
-function handleLike(commentId) {
+function handleLike(commentId, replyId = null) { // commentId es el ID del comentario principal, replyId es el ID de la respuesta
     const user = getCurrentUser();
     if (!user) return showToast('Debes iniciar sesión para dar like.', 'error');
-    const commentRef = db.collection('comments').doc(commentId);
+
+    let docRef;
+    if (replyId) { // Es una respuesta
+        docRef = db.collection('comments').doc(commentId).collection('replies').doc(replyId);
+    } else { // Es un comentario de nivel superior
+        docRef = db.collection('comments').doc(commentId);
+    }
+
     db.runTransaction(async (t) => {
-        const doc = await t.get(commentRef); if (!doc.exists) throw "Error";
-        const data = doc.data(); const likes = data.likes || {}; let count = data.likeCount || 0;
-        if (likes[user.uid]) { delete likes[user.uid]; count--; } else { likes[user.uid] = true; count++; }
-        t.update(commentRef, { likes, likeCount: count });
-    }).catch(err => { console.error(err); showToast('No se pudo procesar el like.', 'error'); });
+        const doc = await t.get(docRef);
+        if (!doc.exists) throw "Error";
+        const data = doc.data();
+        const likes = data.likes || {};
+        let count = data.likeCount || 0;
+
+        if (likes[user.uid]) {
+            delete likes[user.uid];
+            count--;
+        } else {
+            likes[user.uid] = true;
+            count++;
+        }
+        t.update(docRef, { likes, likeCount: count });
+    }).catch(err => {
+        console.error(err);
+        showToast('No se pudo procesar el like.', 'error');
+    });
 }
 
 function handleDeleteClick(event) {

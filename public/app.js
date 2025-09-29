@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Usuario no autenticado. Mostrando solo la opción de login.");
             cleanupMissions();
             initGame(null);
+            // Las secciones de Salón de Honor y Foro ahora son siempre visibles, pero su contenido puede requerir autenticación.
         }
     });
 });

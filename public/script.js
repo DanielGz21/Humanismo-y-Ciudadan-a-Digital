@@ -1,13 +1,17 @@
 import { db } from './firebase-config.js';
 import { showToast } from './notifications.js';
 import { getCurrentUser } from './auth.js';
+import { checkAchievements } from './achievements.js'; // Importar checkAchievements
 
 let score = 0;
+let currentQuizTopic = null; // Global variable to store the current quiz topic
+let currentQuizScore = 0; // Score for the current quiz
 let currentQuestionIndex = 0;
 let questions = [];
 let timerInterval;
 const TIME_LIMIT = 15;
 let remainingAttempts;
+let currentQuizId = null; // Variable para almacenar el ID del quiz actual
 
 // The main initialization function for the game logic
 export function initGame(user) {
@@ -19,6 +23,23 @@ export function initGame(user) {
 }
 
 export async function startGame(quizId) {
+    currentQuizId = quizId; // Almacenar el ID del quiz actual
+    
+    // Fetch quiz details to get the topic
+    const quizRef = db.collection('quizzes').doc(quizId);
+    try {
+        const quizDoc = await quizRef.get();
+        if (quizDoc.exists) {
+            currentQuizTopic = quizDoc.data().topic || 'General'; // Assuming 'topic' field exists, default to 'General'
+        } else {
+            console.warn(`Quiz document with ID ${quizId} not found.`);
+            currentQuizTopic = 'General';
+        }
+    } catch (error) {
+        console.error("Error fetching quiz topic: ", error);
+        currentQuizTopic = 'General';
+    }
+
     await fetchQuestions(quizId);
     
     const user = getCurrentUser();
@@ -33,6 +54,7 @@ export async function startGame(quizId) {
         score = 0;
     }
     
+    currentQuizScore = 0; // Initialize quiz score for the current quiz
     currentQuestionIndex = 0;
     document.getElementById('score').textContent = score;
     document.getElementById('hero').style.display = 'none';
@@ -117,7 +139,7 @@ function getRank(score) {
     return 'Maestro';
 }
 
-async function saveProgress(currentScore, nextQuestionIndex) {
+async function saveProgress(currentScore, nextQuestionIndex, quizId = null) {
     const user = getCurrentUser();
     if (user) {
         const userRef = db.collection('users').doc(user.uid);
@@ -130,12 +152,31 @@ async function saveProgress(currentScore, nextQuestionIndex) {
                     score: currentScore,
                     currentQuestionIndex: nextQuestionIndex
                 };
+
                 if (newRank !== currentRank) {
                     dataToUpdate.rank = newRank;
                     showToast(`¡Has ascendido a ${newRank}!`, 'success');
                 }
                 
-                const batch = db.batch();
+                const batch = db.batch(); // Moved batch declaration here
+
+                // Si el quiz ha terminado (nextQuestionIndex === 0) y tenemos un quizId
+                if (nextQuestionIndex === 0 && quizId) {
+                    dataToUpdate.completedQuizzes = firebase.firestore.FieldValue.arrayUnion(quizId);
+                    
+                    // Store quiz-specific score and topic in quizHistory
+                    const quizHistoryEntry = {
+                        score: currentQuizScore, // Score for the just-completed quiz
+                        topic: currentQuizTopic,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    batch.set(userRef, {
+                        quizHistory: {
+                            [quizId]: quizHistoryEntry
+                        }
+                    }, { merge: true }); // Use merge: true to update only quizHistory
+                }
+                
                 batch.update(userRef, dataToUpdate);
 
                 const scoreHistoryRef = userRef.collection('scoreHistory').doc();
@@ -145,6 +186,10 @@ async function saveProgress(currentScore, nextQuestionIndex) {
                 });
 
                 await batch.commit();
+
+                // Después de guardar el progreso, verificar logros
+                const newAchievements = await checkAchievements(user, db);
+                newAchievements.forEach(ach => showToast(`¡Logro desbloqueado: ${ach.name}!`, 'success'));
             }
         } catch (error) {
             console.error("Error al guardar el progreso: ", error);
@@ -167,10 +212,11 @@ function selectAnswer(selectedButton, selectedOption) {
         }
         selectedButton.style.borderColor = "var(--accent-neon-cyan)";
         score += 10;
+        currentQuizScore += 10; // Increment score for the current quiz
         document.getElementById('score').textContent = score;
         document.querySelectorAll('#options .btn').forEach(btn => btn.disabled = true);
         document.getElementById('next-btn').style.display = 'block';
-        saveProgress(score, currentQuestionIndex + 1);
+        saveProgress(score, currentQuestionIndex + 1, currentQuizId);
     } else {
         remainingAttempts--;
         document.getElementById('attempts').textContent = remainingAttempts;
@@ -190,14 +236,14 @@ function selectAnswer(selectedButton, selectedOption) {
             }
             document.querySelectorAll('#options .btn').forEach(btn => btn.disabled = true);
             document.getElementById('next-btn').style.display = 'block';
-            saveProgress(score, currentQuestionIndex + 1);
+            saveProgress(score, currentQuestionIndex + 1, currentQuizId);
         }
     }
 }
 
 function handleNextClick() {
     currentQuestionIndex++;
-    saveProgress(score, currentQuestionIndex);
+    saveProgress(score, currentQuestionIndex, currentQuizId);
     loadQuestion();
 }
 
@@ -211,11 +257,11 @@ function showFinalScore() {
     `;
     document.getElementById('restart-btn').addEventListener('click', () => window.location.reload());
     
-    // Desbloquear y mostrar el Salón de Honor y el Foro
-    document.getElementById('leaderboard-section').style.display = 'block';
-    document.getElementById('comments-section').style.display = 'block';
+    // Las secciones de Salón de Honor y Foro ahora son visibles por defecto y su visibilidad se gestiona en app.js
+    // document.getElementById('leaderboard-section').style.display = 'block';
+    // document.getElementById('comments-section').style.display = 'block';
 
-    saveProgress(score, 0); // Guardar el progreso final
+    saveProgress(score, 0, currentQuizId); // Guardar el progreso final y verificar logros
 }
 
 const style = document.createElement('style');

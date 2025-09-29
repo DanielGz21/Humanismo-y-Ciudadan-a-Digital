@@ -117,6 +117,10 @@ function showQuizForm(quizData) {
                 <label for="quiz-description">Descripción</label>
                 <textarea id="quiz-description" class="admin-textarea" required>${quizData ? quizData.description : ''}</textarea>
             </div>
+            <div class="form-group">
+                <label for="quiz-category">Categoría</label>
+                <input type="text" id="quiz-category" class="admin-input" value="${quizData ? quizData.category : ''}" required>
+            </div>
             <hr>
             <h4>Preguntas</h4>
             <div id="questions-container">
@@ -172,7 +176,7 @@ async function saveQuiz(e) {
         const options = Array.from(qEl.querySelectorAll('.question-option')).map(opt => opt.value.trim());
         const answer = qEl.querySelector('.question-answer').value.trim();
 
-        if (!title || !description || !questionText || options.some(o => !o) || !answer) {
+        if (!title || !description || !category || !questionText || options.some(o => !o) || !answer) {
             isValid = false;
         }
 
@@ -188,7 +192,8 @@ async function saveQuiz(e) {
         return;
     }
 
-    const quizData = { title, description, questionSet };
+    const category = document.getElementById('quiz-category').value.trim();
+    const quizData = { title, description, category, questionSet };
     try {
         if (currentEditingQuizId) {
             await db.collection('quizzes').doc(currentEditingQuizId).set(quizData);
