@@ -21,11 +21,13 @@ export function initComments(user) {
             commentsList.innerHTML = '<p>Sé el primero en dejar un comentario.</p>';
             return;
         }
-        snapshot.forEach((doc, index) => {
-            const commentEl = renderComment(doc);
-            // Añadimos un retraso escalonado para la animación
-            commentEl.style.animationDelay = `${index * 100}ms`;
-            commentsList.appendChild(commentEl);
+        // Bucle corregido para manejar la función asíncrona
+        snapshot.forEach(async (doc, index) => {
+            const commentEl = await renderComment(doc); // Esperamos a que el elemento se cree
+            if (commentEl) {
+                commentEl.style.animationDelay = `${index * 100}ms`;
+                commentsList.appendChild(commentEl);
+            }
         });
     }, error => {
         console.error("Error al cargar comentarios: ", error);
@@ -36,7 +38,7 @@ export function initComments(user) {
 async function renderComment(doc) {
     const data = doc.data();
     const user = getCurrentUser();
-    const isAdmin = await isCurrentUserAdmin(); // Es asíncrona ahora
+    const isAdmin = await isCurrentUserAdmin();
     const li = document.createElement('div');
     li.className = 'comment';
     const isLiked = user && data.likes && data.likes[user.uid];
@@ -69,8 +71,9 @@ async function renderComment(doc) {
     const repliesQuery = db.collection('comments').doc(doc.id).collection('replies').orderBy('timestamp', 'asc');
     repliesQuery.onSnapshot(replySnapshot => {
         repliesListEl.innerHTML = '';
-        replySnapshot.forEach(replyDoc => {
-            repliesListEl.appendChild(renderReply(replyDoc, doc.id));
+        replySnapshot.forEach(async replyDoc => { // Bucle de respuestas también asíncrono
+            const replyEl = await renderReply(replyDoc, doc.id);
+            repliesListEl.appendChild(replyEl);
         });
     });
 
